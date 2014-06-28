@@ -7,6 +7,11 @@ gem 'addressable'
 
 gem 'rake'
 
-group :development do
+group :development, :test do
   gem 'pry'
+end
+
+group :test do
+  gem 'rspec'
+  gem 'rspec-mocks'
 end
