@@ -18,6 +18,7 @@ module SimpleCrawler
       def links
         @links ||= begin
           document.xpath("//a[@href]|//link[@href]").select do |node|
+            next false if node["href"].nil? || node["href"].empty?
             next true if node["rel"].nil?
             SUPPORTED_LINK_LINKS.include?(node["rel"])
           end.map do |node|
