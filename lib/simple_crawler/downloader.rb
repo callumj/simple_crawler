@@ -1,9 +1,16 @@
+require 'zlib'
 require 'faraday'
 require 'faraday_middleware'
 require 'addressable/uri'
 
 module SimpleCrawler
   class Downloader
+
+    MAX_ZLIB_ERROR = 2
+    MAX_FARADAY_ERROR = 6
+    SLEEP_AFTER = 1
+    SLEEP_SQUARE_AFTER = 3
+    SLEEP_MULT = 0.02
 
     class DownloadResponse < Struct.new(:source, :headers, :status, :final_uri); end
 
@@ -29,16 +36,16 @@ module SimpleCrawler
         end
         return DownloadResponse.new(resp.body, resp.headers, resp.status, resp.env.url)
       rescue Faraday::Error => err
-        raise err if try_count > 5
+        raise err if try_count >= MAX_FARADAY_ERROR
 
-        if try_count > 1
-          base_multiplier = try_count > 2 ? try_count.to_f * try_count.to_f : try_count.to_f
-          sleep(base_multiplier * 0.02)
+        if try_count > SLEEP_AFTER
+          base_multiplier = try_count > SLEEP_SQUARE_AFTER ? try_count.to_f * try_count.to_f : try_count.to_f
+          sleep(base_multiplier * SLEEP_MULT)
         end
 
         retry
       rescue Zlib::DataError => err
-        raise err if try_count >= 2
+        raise err if try_count >= MAX_ZLIB_ERROR
 
         header_options = {
           accept_encoding: 'none'
