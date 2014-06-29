@@ -69,4 +69,61 @@ describe SimpleCrawler::Scrapers::HTML do
 
   end
 
+  describe "#assets" do
+
+    let(:nd1) do
+      double(:nd1).tap do |n|
+        expect(n).to receive(:[]).with("rel").and_return(nil)
+        expect(n).to receive(:[]).with("href").and_return("/a_href")
+        expect(n).to receive(:text).and_return("A")
+      end
+    end
+    let(:nd2) do
+      double(:nd2).tap do |n|
+        expect(n).to receive(:[]).with("rel").and_return(nil)
+        expect(n).to receive(:[]).with("href").and_return(nil)
+        expect(n).to receive(:[]).with("src").and_return("http://google.com/a_href")
+        expect(n).to receive(:text).and_return("B")
+      end
+    end
+    let(:nd3) do
+      double(:nd3).tap do |n|
+        expect(n).to receive(:[]).with("rel").and_return("stylesheet").twice
+        expect(n).to receive(:[]).with("href").and_return("/img.png")
+        expect(n).to receive(:text).and_return("C")
+      end
+    end
+    let(:nd4) do
+      double(:nd4).tap do |n|
+        expect(n).to receive(:[]).with("rel").and_return("icon").twice
+        expect(n).to receive(:[]).with("href").and_return(nil)
+        expect(n).to receive(:[]).with("src").and_return("/thingo.png")
+        expect(n).to receive(:text).and_return("D")
+      end
+    end
+    let(:nd5) do
+      double(:nd5).tap do |n|
+        expect(n).to receive(:[]).with("rel").and_return("external").twice
+      end
+    end
+
+    before :each do
+      expect(nokogiri_doc).to receive(:xpath).with("//link[@href]|//img[@src]|//script[@src]")
+      .and_return([nd1, nd2, nd3, nd4, nd5])
+    end
+
+    it "should be filtered correctly" do
+      expect(subject.assets.length).to eq(4)
+    end
+
+    it "should include hrefs" do
+      expect(subject.assets).to include ["/a_href", "A"], ["http://google.com/a_href", "B"]
+    end
+
+    it "should include stylsheets or icons" do
+      expect(subject.assets).to include ["/img.png", "C"], ["/thingo.png", "D"]
+    end
+
+  end
+
 end
