@@ -7,6 +7,9 @@ require 'rspec/mocks'
 
 require 'pry'
 
+this_root = File.dirname(__FILE__)
+SPEC_ROOT = File.expand_path(this_root, "../")
+
 RSpec.configure do |config|
   config.mock_with :rspec
 
