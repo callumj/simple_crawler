@@ -66,27 +66,49 @@ describe SimpleCrawler::Downloader do
       expect(yielding_obj.headers).to eq({accept_encoding: 'none'})
     end
 
-    it "should return a download response on success" do
-      uri = URI("http://google.com")
-      env = double(:env).tap do |e|
-        expect(e).to receive(:url).and_return(uri)
+    context "successful request" do
+      let(:body) { "!!body!!" }
+      let(:uri) { URI("http://google.com") }
+      let(:f_env) do
+        double(:env).tap do |e|
+          expect(e).to receive(:url).and_return(uri)
+        end
       end
 
-      fday_response = double(:resp).tap do |r|
-        expect(r).to receive(:body).and_return("!!body!!")
-        expect(r).to receive(:headers).and_return({headers: true})
-        expect(r).to receive(:status).and_return(278)
-        expect(r).to receive(:env).and_return(env)
+      let(:fday_response) do
+        double(:resp).tap do |r|
+          expect(r).to receive(:body).and_return(body)
+          expect(r).to receive(:headers).and_return({headers: true})
+          expect(r).to receive(:status).and_return(278)
+          expect(r).to receive(:env).and_return(f_env)
+        end
       end
 
-      expect(Faraday).to receive(:new).with("http://ask.com").and_return(faraday)
-      expect(faraday).to receive(:get).with("/req/a/b?query=true&fun=ok").and_return(fday_response)
+      before :each do
+        expect(Faraday).to receive(:new).with("http://ask.com").and_return(faraday)
+        expect(faraday).to receive(:get).with("/req/a/b?query=true&fun=ok").and_return(fday_response)
+      end
 
-      ret = subject.obtain_source
-      expect(ret.source).to eq("!!body!!")
-      expect(ret.headers).to eq({headers: true})
-      expect(ret.status).to eq(278)
-      expect(ret.final_uri).to eq(uri)
+      it "should return a download response on success" do
+        ret = subject.obtain_source
+        expect(ret.source).to eq("!!body!!")
+        expect(ret.headers).to eq({headers: true})
+        expect(ret.status).to eq(278)
+        expect(ret.final_uri).to eq(uri)
+      end
+
+      it "should convert encoding from ASCII to UTF8" do
+        enc_obj = double(:encoding).tap do |e|
+          expect(e).to receive(:name).and_return("ASCII-8BIT")
+        end
+
+        expect(body).to receive(:encoding).and_return(enc_obj)
+        expect(body).to receive(:force_encoding).with("utf-8").and_return("newthing")
+
+        ret = subject.obtain_source
+        expect(ret.source).to eq("newthing")
+      end
+
     end
   end
 

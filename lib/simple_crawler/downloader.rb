@@ -34,7 +34,14 @@ module SimpleCrawler
             header_options.each { |k,v| r.headers[k] = v }
           end
         end
-        return DownloadResponse.new(resp.body, resp.headers, resp.status, resp.env.url)
+
+        source = resp.body
+
+        if source.encoding.name.downcase.include?("ascii")
+          source = source.force_encoding("utf-8")
+        end
+
+        return DownloadResponse.new(source, resp.headers, resp.status, resp.env.url)
       rescue Faraday::Error => err
         raise err if try_count >= MAX_FARADAY_ERROR
 
