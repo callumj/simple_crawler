@@ -12,8 +12,6 @@ module SimpleCrawler
     SLEEP_SQUARE_AFTER = 3
     SLEEP_MULT = 0.02
 
-    class DownloadResponse < Struct.new(:source, :headers, :status, :final_uri); end
-
     attr_accessor :url
 
     def self.source_for(potential_url)
@@ -41,7 +39,7 @@ module SimpleCrawler
           source = source.force_encoding("utf-8")
         end
 
-        return DownloadResponse.new(source, resp.headers, resp.status, resp.env.url)
+        return Models::DownloadResponse.new(source, resp.headers, resp.status, resp.env.url)
       rescue Faraday::Error => err
         raise err if try_count >= MAX_FARADAY_ERROR
 
