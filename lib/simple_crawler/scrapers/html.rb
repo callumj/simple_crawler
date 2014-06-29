@@ -2,7 +2,7 @@ require 'nokogiri'
 
 module SimpleCrawler
   module Scrapers
-    class HTML
+    class HTML < Base
 
       attr_accessor :dl_resp, :document
 
