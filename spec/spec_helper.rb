@@ -5,6 +5,8 @@ Bundler.setup :default, :test
 require 'rspec'
 require 'rspec/mocks'
 
+require 'pry'
+
 RSpec.configure do |config|
   config.mock_with :rspec
 
