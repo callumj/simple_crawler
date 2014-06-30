@@ -159,6 +159,26 @@ describe SimpleCrawler::GlobalQueue do
         expect(subject.dequeue).to eq uri7
       end
 
+      it "should safely handle competing threads" do
+        3.times { subject.dequeue }
+
+        uri6 = Addressable::URI.parse "http://googly.com"
+        uri7 = Addressable::URI.parse "http://googlo.com"
+        uri8 = Addressable::URI.parse "http://googl0.com"
+        uri9 = Addressable::URI.parse "http://googly.com"
+
+        Thread.new { subject.enqueue(uri6) }
+        Thread.new { subject.enqueue(uri4) }
+        Thread.new { subject.enqueue(uri7) }
+        Thread.new { subject.enqueue(uri8) }
+        Thread.new { subject.enqueue(uri9) }
+
+        res = 3.times.map { subject.dequeue }
+        expect(subject.dequeue).to be_nil
+
+        expect(res).to match_array [uri6, uri7, uri8]
+      end
+
     end
 
   end

@@ -1,3 +1,5 @@
+require 'thread'
+
 module SimpleCrawler
   class GlobalQueue
 
@@ -26,6 +28,7 @@ module SimpleCrawler
       @host_restriction = opts[:host_restriction]
       @head = nil
       @tail = nil
+      @mutex = Mutex.new
       @known_uris = Set.new
     end
 
@@ -51,29 +54,37 @@ module SimpleCrawler
     end
 
     def enqueue(uri)
-      return false unless can_enqueue? uri
+      res = @mutex.synchronize do
+        next false unless can_enqueue? uri
 
-      @known_uris << cleanse_uri(uri)
-      if @head.nil?
-        @head = Node.new(uri)
-        @tail = @head
-      else
-        @tail.next = Node.new(uri)
-        @tail = @tail.next
+        @known_uris << cleanse_uri(uri)
+        if @head.nil?
+          @head = Node.new(uri)
+          @tail = @head
+        else
+          @tail.next = Node.new(uri)
+          @tail = @tail.next
+        end
+
+        next true
       end
 
-      true
+      res
     end
 
     def dequeue
-      return unless @head
+      fetched = nil
+      @mutex.synchronize do
+        next nil unless @head
+      
+        fetched = @head
+        unless fetched.nil?
+          @head = fetched.next
+        end
 
-      fetched = @head
-      unless fetched.nil?
-        @head = fetched.next
+        @tail = nil if @head == nil
       end
-
-      @tail = nil if @head == nil
+      return nil unless fetched
 
       fetched.uri
     end
