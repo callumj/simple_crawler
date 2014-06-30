@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'pry'
 
 module SimpleCrawler
   module Scrapers
@@ -12,7 +13,15 @@ module SimpleCrawler
       def initialize(dl_resp)
         raise ArgumentError unless dl_resp.is_a?(Models::DownloadResponse)
         @dl_resp  = dl_resp
-        @document = Nokogiri::HTML(dl_resp.source)
+        @document = Nokogiri::HTML(cleansed_source)
+      end
+
+      def cleansed_source
+        @cleansed_source ||= begin
+          b = dl_resp.source.gsub(/<\!--\[if [A-Za-z0-9 ]+\]>/, "")
+          b.gsub!(/<\!\[endif\]-->/, "")
+          b
+        end
       end
 
       def links
@@ -33,7 +42,8 @@ module SimpleCrawler
             next true if node["rel"].nil?
             SUPPORTED_LINK_ASSETS.include?(node["rel"])
           end.map do |node|
-            [node["href"] || node["src"], node.text.strip]
+            type = node["rel"].nil? ? node.name : node["rel"]
+            [node["href"] || node["src"], node.text.strip, type]
           end.uniq { |(href, text)| href }
         end
       end

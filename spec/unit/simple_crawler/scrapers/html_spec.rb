@@ -84,29 +84,31 @@ describe SimpleCrawler::Scrapers::HTML do
 
     let(:nd1) do
       double(:nd1).tap do |n|
-        expect(n).to receive(:[]).with("rel").and_return(nil)
+        expect(n).to receive(:[]).with("rel").and_return(nil).twice
         expect(n).to receive(:[]).with("href").and_return("/a_href")
         expect(n).to receive(:text).and_return("A")
+        expect(n).to receive(:name).and_return("img")
       end
     end
     let(:nd2) do
       double(:nd2).tap do |n|
-        expect(n).to receive(:[]).with("rel").and_return(nil)
+        expect(n).to receive(:[]).with("rel").and_return(nil).twice
         expect(n).to receive(:[]).with("href").and_return(nil)
         expect(n).to receive(:[]).with("src").and_return("http://google.com/a_href")
         expect(n).to receive(:text).and_return("B")
+        expect(n).to receive(:name).and_return("img")
       end
     end
     let(:nd3) do
       double(:nd3).tap do |n|
-        expect(n).to receive(:[]).with("rel").and_return("stylesheet").twice
+        expect(n).to receive(:[]).with("rel").and_return("stylesheet").exactly(4).times
         expect(n).to receive(:[]).with("href").and_return("/img.png")
         expect(n).to receive(:text).and_return("C")
       end
     end
     let(:nd4) do
       double(:nd4).tap do |n|
-        expect(n).to receive(:[]).with("rel").and_return("icon").twice
+        expect(n).to receive(:[]).with("rel").and_return("icon").exactly(4).times
         expect(n).to receive(:[]).with("href").and_return(nil)
         expect(n).to receive(:[]).with("src").and_return("/thingo.png")
         expect(n).to receive(:text).and_return("D")
@@ -128,11 +130,11 @@ describe SimpleCrawler::Scrapers::HTML do
     end
 
     it "should include hrefs" do
-      expect(subject.assets).to include ["/a_href", "A"], ["http://google.com/a_href", "B"]
+      expect(subject.assets).to include ["/a_href", "A", "img"], ["http://google.com/a_href", "B", "img"]
     end
 
-    it "should include stylsheets or icons" do
-      expect(subject.assets).to include ["/img.png", "C"], ["/thingo.png", "D"]
+    it "should include stylesheets or icons" do
+      expect(subject.assets).to include ["/img.png", "C", "stylesheet"], ["/thingo.png", "D", "icon"]
     end
 
   end
