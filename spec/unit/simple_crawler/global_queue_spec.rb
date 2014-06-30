@@ -108,4 +108,39 @@ describe SimpleCrawler::GlobalQueue do
 
   end
 
+  describe "queue manipulation" do
+
+    it "should silently fail when the URI cannot be enqueued" do
+      uri = Addressable::URI.parse "http://google.com"
+      expect(subject).to receive(:can_enqueue?).with(uri).and_return(false)
+
+      expect(subject.enqueue(uri)).to eq false
+    end
+
+    it "should add when the URI can be enqueued" do
+      uri = Addressable::URI.parse "http://google.com"
+      expect(subject).to receive(:can_enqueue?).with(uri).and_return(true)
+
+      expect(subject.enqueue(uri)).to eq true
+      expect(subject.peek).to eq uri
+    end
+
+    it "should be able to add more" do
+      uri1 = Addressable::URI.parse "http://google.com"
+      uri2 = Addressable::URI.parse "http://google.com"
+      uri3 = Addressable::URI.parse "http://google.com/index.html"
+      uri4 = Addressable::URI.parse "http://google.com/rails.html"
+
+      [uri1, uri2, uri3, uri4].each do |o|
+        subject.enqueue o
+      end
+
+      expect(subject.dequeue).to eq uri1
+      expect(subject.dequeue).to eq uri3
+      expect(subject.dequeue).to eq uri4
+      expect(subject.dequeue).to be_nil
+    end
+
+  end
+
 end

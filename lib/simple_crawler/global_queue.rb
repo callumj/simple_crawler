@@ -46,6 +46,10 @@ module SimpleCrawler
       valid_host?(uri) && !visited_before?(uri)
     end
 
+    def peek
+      @head && @head.uri
+    end
+
     def enqueue(uri)
       return false unless can_enqueue? uri
 
@@ -57,6 +61,7 @@ module SimpleCrawler
         @tail.next = Node.new(uri)
         @tail = @tail.next
       end
+
       true
     end
 
@@ -67,6 +72,8 @@ module SimpleCrawler
       unless fetched.nil?
         @head = fetched.next
       end
+
+      @tail = nil if @head == nil
 
       fetched.uri
     end
