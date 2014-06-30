@@ -33,7 +33,7 @@ describe SimpleCrawler::GlobalQueue do
     end
 
     it "should initialise the basics" do
-      expect(subject.known_uris).to be_a(Array)
+      expect(subject.known_uris).to be_a(Set)
       expect(subject.known_uris).to be_empty
     end
 
@@ -125,20 +125,40 @@ describe SimpleCrawler::GlobalQueue do
       expect(subject.peek).to eq uri
     end
 
-    it "should be able to add more" do
-      uri1 = Addressable::URI.parse "http://google.com"
-      uri2 = Addressable::URI.parse "http://google.com"
-      uri3 = Addressable::URI.parse "http://google.com/index.html"
-      uri4 = Addressable::URI.parse "http://google.com/rails.html"
+    context "multiple enqueuing" do
 
-      [uri1, uri2, uri3, uri4].each do |o|
-        subject.enqueue o
+      let(:uri1) { Addressable::URI.parse "http://google.com" }
+      let(:uri2) { Addressable::URI.parse "http://google.com" }
+      let(:uri3) { Addressable::URI.parse "http://google.com/index.html" }
+      let(:uri4) { Addressable::URI.parse "http://google.com/rails.html" }
+
+      before :each do
+        [uri1, uri2, uri3, uri4].each do |o|
+          subject.enqueue o
+        end
       end
 
-      expect(subject.dequeue).to eq uri1
-      expect(subject.dequeue).to eq uri3
-      expect(subject.dequeue).to eq uri4
-      expect(subject.dequeue).to be_nil
+      it "should be dequeuing in order" do
+        expect(subject.dequeue).to eq uri1
+        expect(subject.dequeue).to eq uri3
+        expect(subject.dequeue).to eq uri4
+        expect(subject.dequeue).to be_nil
+      end
+
+      it "should be able to restore after a queue depletition" do
+        3.times { subject.dequeue }
+
+        uri6 = Addressable::URI.parse "http://googly.com"
+        uri7 = Addressable::URI.parse "http://googlo.com"
+
+        subject.enqueue(uri6)
+        subject.enqueue(uri4)
+        subject.enqueue(uri7)
+
+        expect(subject.dequeue).to eq uri6
+        expect(subject.dequeue).to eq uri7
+      end
+
     end
 
   end

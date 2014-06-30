@@ -26,7 +26,7 @@ module SimpleCrawler
       @host_restriction = opts[:host_restriction]
       @head = nil
       @tail = nil
-      @known_uris = []
+      @known_uris = Set.new
     end
 
     def valid_host?(uri)
