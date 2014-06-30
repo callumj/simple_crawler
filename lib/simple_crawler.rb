@@ -5,3 +5,6 @@ require 'simple_crawler/global_queue'
 require 'simple_crawler/downloader'
 require 'simple_crawler/scrapers'
 require 'simple_crawler/content_fetcher'
+require 'simple_crawler/worker'
+
+require 'simple_crawler/tasks'
