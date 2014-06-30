@@ -42,8 +42,8 @@ describe SimpleCrawler::GlobalQueue do
   describe "#valid_host?" do
 
     it "should be true with no restriction" do
-      expect(subject).to be_valid_host("domain.com")
-      expect(subject).to be_valid_host("enron.com")
+      expect(subject).to be_valid_host(URI.parse("http://domain.com"))
+      expect(subject).to be_valid_host(URI.parse("http://enron.com"))
     end
 
     it "should be matching on string level when a string" do

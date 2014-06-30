@@ -33,6 +33,7 @@ module SimpleCrawler
     end
 
     def valid_host?(uri)
+      return false unless uri.scheme == "http" || uri.scheme == "https"
       return true unless host_restriction
       if host_restriction.is_a?(String)
         host_restriction.downcase == uri.host.downcase
