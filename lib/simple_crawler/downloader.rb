@@ -67,7 +67,7 @@ module SimpleCrawler
 
       def connection
         @connection ||= Faraday.new(parsed_uri.site) do |b|
-          b.use FaradayMiddleware::FollowRedirects
+          b.use FaradayMiddleware::FollowRedirects, limit: 10
           b.adapter :net_http
         end
       end
