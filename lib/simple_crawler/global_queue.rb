@@ -51,7 +51,7 @@ module SimpleCrawler
     end
 
     def peek
-      @head && @head.uri
+      @mutex.synchronize { @head && @head.uri }
     end
 
     def enqueue(uri)
