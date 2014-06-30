@@ -125,16 +125,64 @@ describe SimpleCrawler::Scrapers::HTML do
       .and_return([nd1, nd2, nd3, nd4, nd5])
     end
 
-    it "should be filtered correctly" do
-      expect(subject.assets.length).to eq(4)
+    context "with no commented out assets" do
+
+      before :each do
+        expect(nokogiri_doc).to receive(:xpath).with("//head/comment()").and_return([])
+      end
+
+      it "should be filtered correctly" do
+        expect(subject.assets.length).to eq(4)
+      end
+
+      it "should include hrefs" do
+        expect(subject.assets).to include ["/a_href", "A", "img"], ["http://google.com/a_href", "B", "img"]
+      end
+
+      it "should include stylesheets or icons" do
+        expect(subject.assets).to include ["/img.png", "C", "stylesheet"], ["/thingo.png", "D", "icon"]
+      end
+
     end
 
-    it "should include hrefs" do
-      expect(subject.assets).to include ["/a_href", "A", "img"], ["http://google.com/a_href", "B", "img"]
-    end
+    context "with commented out assets" do
 
-    it "should include stylesheets or icons" do
-      expect(subject.assets).to include ["/img.png", "C", "stylesheet"], ["/thingo.png", "D", "icon"]
+      let(:script_comment) do
+        str = <<-EOF
+          [if lt IE 9]>
+            <script src="/App_Themes/Datacom/scripts/libs/html5shiv.js"></script>
+            <script src="/App_Themes/Datacom/scripts/libs/html5shiv-printshiv.js"></script>
+          <![endif]
+        EOF
+        double(:script_comment).tap do |s|
+          expect(s).to receive(:text).and_return(str)
+        end
+      end
+
+      def self.make_node_var(name, str)
+        let(name) do
+          double(name).tap do |s|
+            expect(s).to receive(:text).and_return(str)
+          end
+        end
+      end
+
+      make_node_var(:other_comment1, '[if lt IE 7 ]> <html lang="en-nz" class="no-js ie6" > <![endif]')
+      make_node_var(:other_comment2, '[if IE 7 ]>    <html lang="en-nz" class="no-js ie7" > <![endif]')
+      make_node_var(:other_comment3, '[if IE 10 ]>    <html lang="en-nz" class="no-js ie10" > <![endif]')
+
+      before :each do
+        expect(nokogiri_doc).to receive(:xpath).with("//head/comment()").and_return([script_comment, other_comment1, other_comment2, other_comment3])
+      end
+
+      it "should be filtered correctly" do
+        expect(subject.assets.length).to eq(6)
+      end
+
+      it "should include the scripts" do
+        expect(subject.assets).to include ["/App_Themes/Datacom/scripts/libs/html5shiv.js", "", "script"], ["/App_Themes/Datacom/scripts/libs/html5shiv-printshiv.js", "", "script"]
+      end
+
     end
 
   end

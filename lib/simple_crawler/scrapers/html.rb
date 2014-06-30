@@ -1,5 +1,4 @@
 require 'nokogiri'
-require 'pry'
 
 module SimpleCrawler
   module Scrapers
@@ -13,15 +12,7 @@ module SimpleCrawler
       def initialize(dl_resp)
         raise ArgumentError unless dl_resp.is_a?(Models::DownloadResponse)
         @dl_resp  = dl_resp
-        @document = Nokogiri::HTML(cleansed_source)
-      end
-
-      def cleansed_source
-        @cleansed_source ||= begin
-          b = dl_resp.source.gsub(/<\!--\[if [A-Za-z0-9 ]+\]>/, "")
-          b.gsub!(/<\!\[endif\]-->/, "")
-          b
-        end
+        @document = Nokogiri::HTML(dl_resp.source)
       end
 
       def links
@@ -38,7 +29,26 @@ module SimpleCrawler
 
       def assets
         @assets ||= begin
-          document.xpath("//link[@href]|//img[@src]|//script[@src]").select do |node|
+          base = extract_from_assets document
+
+          document.xpath("//head/comment()").each do |node|
+            text = node.text
+            next if text.match(/<script/).nil?
+
+            text.gsub! /\[if [A-Za-z0-9 ]+\]>[^<]+/, ""
+            text.gsub! /<!\[endif\]/, ""
+            mini_doc = Nokogiri::HTML.parse text
+            base += extract_from_assets mini_doc
+          end
+          
+          base
+        end
+      end
+
+      private
+
+        def extract_from_assets(doc)
+          doc.xpath("//link[@href]|//img[@src]|//script[@src]").select do |node|
             next true if node["rel"].nil?
             SUPPORTED_LINK_ASSETS.include?(node["rel"])
           end.map do |node|
@@ -46,7 +56,6 @@ module SimpleCrawler
             [node["href"] || node["src"], node.text.strip, type]
           end.uniq { |(href, text)| href }
         end
-      end
     end
   end
 end
