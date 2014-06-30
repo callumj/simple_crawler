@@ -5,7 +5,7 @@ module SimpleCrawler
   module Tasks
     class MultipleWorkers
 
-      MAX_WORKERS = 25
+      MAX_WORKERS = 50
 
       def self.run(initial_uri)
         parsed = Addressable::URI.parse initial_uri
@@ -14,7 +14,9 @@ module SimpleCrawler
         SimpleCrawler::GlobalQueue.setup_instance! host_restriction: parsed.host
         SimpleCrawler::GlobalQueue.instance.enqueue parsed
 
-        MultipleWorkers.new.spawn
+        inst = MultipleWorkers.new
+        inst.spawn
+        inst
       end
 
       attr_accessor :running_workers
