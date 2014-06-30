@@ -5,7 +5,7 @@ module SimpleCrawler
   module Tasks
     class MultipleWorkers
 
-      MAX_WORKERS = 20
+      MAX_WORKERS = 25
 
       def self.run(initial_uri)
         parsed = Addressable::URI.parse initial_uri
@@ -32,7 +32,7 @@ module SimpleCrawler
         end
         return if amount_to_spawn == 0
 
-        amount_to_spawn.times { |i| STDOUT.puts "Spawning worker #{i}"; Thread.new { run } }
+        amount_to_spawn.times { |i| Thread.new { run } }
       end
 
       def run
