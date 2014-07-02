@@ -1,3 +1,5 @@
+require 'json'
+
 module SimpleCrawler
   module Models
     class ContentInfo
@@ -16,6 +18,18 @@ module SimpleCrawler
 
       def add_assets(ass_or_ary)
         add_object_type :assets, Asset, ass_or_ary
+      end
+
+      def as_json
+        {
+          uri: final_uri.to_s,
+          assets: assets.map(&:as_json),
+          links:  links.map(&:as_json)
+        }
+      end
+
+      def to_json(obj)
+        as_json.to_json(obj)
       end
 
       private

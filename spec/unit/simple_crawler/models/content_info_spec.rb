@@ -80,7 +80,7 @@ describe SimpleCrawler::Models::ContentInfo do
 
   end
 
-describe "manipulating links" do
+  describe "manipulating links" do
 
     subject { described_class.new uri }
 
@@ -123,6 +123,42 @@ describe "manipulating links" do
       expect do
         subject.add_links link3
       end.to_not change { subject.links }
+    end
+
+  end
+
+  describe "#as_json" do
+
+    subject { described_class.new uri }
+
+    let(:json_hash) { subject.as_json }
+
+    it "should expose the URI" do
+      expect(json_hash[:uri]).to eq("http://callumj.com/index.html")
+    end
+
+    it "should expose the assets" do
+      as1 = double(:asset).tap do |a|
+        expect(a).to receive(:as_json).and_return({as1: true})
+      end
+      as2 = double(:asset).tap do |a|
+        expect(a).to receive(:as_json).and_return({as2: true})
+      end
+      expect(subject).to receive(:assets).and_return([as1, as2])
+
+      expect(json_hash[:assets]).to match_array([{as1: true}, {as2: true}])
+    end
+
+    it "should expose the links" do
+      ln1 = double(:link).tap do |a|
+        expect(a).to receive(:as_json).and_return({ln1: true})
+      end
+      ln2 = double(:link).tap do |a|
+        expect(a).to receive(:as_json).and_return({ln2: true})
+      end
+      expect(subject).to receive(:links).and_return([ln1, ln2])
+
+      expect(json_hash[:links]).to match_array([{ln1: true}, {ln2: true}])
     end
 
   end
