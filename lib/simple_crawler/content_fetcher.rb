@@ -39,7 +39,7 @@ module SimpleCrawler
       def assets
         @assets ||= begin
           parsed.assets.map do |(uri, name, type)|
-            Models::ContentInfo::Asset.new(merge_uri_with_page(uri), type)
+            Models::Asset.new(merge_uri_with_page(uri), type)
           end
         end
       end
@@ -47,7 +47,7 @@ module SimpleCrawler
       def links
         @links ||= begin
           parsed.links.map do |(uri, name)|
-            Models::ContentInfo::Link.new(merge_uri_with_page(uri))
+            Models::Link.new(merge_uri_with_page(uri))
           end
         end
       end

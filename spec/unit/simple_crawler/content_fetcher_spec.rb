@@ -76,10 +76,10 @@ describe SimpleCrawler::ContentFetcher do
         assets << ["http://anz.com/thingo.css", "Some stylesheet", "stylesheet"]
         assets << ["c/d/magic.gif", "Some Gif", "giffy"]
 
-        expect(subject.content_info.assets).to match_array([
-          SimpleCrawler::Models::ContentInfo::Asset.new(Addressable::URI.parse("http://callumj.com/image.png"), "image"),
-          SimpleCrawler::Models::ContentInfo::Asset.new(Addressable::URI.parse("http://anz.com/thingo.css"), "stylesheet"),
-          SimpleCrawler::Models::ContentInfo::Asset.new(Addressable::URI.parse("http://callumj.com/a/b/c/d/magic.gif"), "giffy")
+        expect(subject.content_info.assets.to_a).to match_array([
+          SimpleCrawler::Models::Asset.new(Addressable::URI.parse("http://callumj.com/image.png"), "image"),
+          SimpleCrawler::Models::Asset.new(Addressable::URI.parse("http://anz.com/thingo.css"), "stylesheet"),
+          SimpleCrawler::Models::Asset.new(Addressable::URI.parse("http://callumj.com/a/b/c/d/magic.gif"), "giffy")
         ])
       end
 
@@ -89,9 +89,9 @@ describe SimpleCrawler::ContentFetcher do
         links << ["c/d/magic.gif", "Some Gif"]
 
         expect(subject.content_info.links).to match_array([
-          SimpleCrawler::Models::ContentInfo::Link.new(Addressable::URI.parse("http://callumj.com/image.png")),
-          SimpleCrawler::Models::ContentInfo::Link.new(Addressable::URI.parse("http://anz.com/thingo.css")),
-          SimpleCrawler::Models::ContentInfo::Link.new(Addressable::URI.parse("http://callumj.com/a/b/c/d/magic.gif"))
+          SimpleCrawler::Models::Link.new(Addressable::URI.parse("http://callumj.com/image.png")),
+          SimpleCrawler::Models::Link.new(Addressable::URI.parse("http://anz.com/thingo.css")),
+          SimpleCrawler::Models::Link.new(Addressable::URI.parse("http://callumj.com/a/b/c/d/magic.gif"))
         ])
       end
     end
