@@ -20,6 +20,12 @@ module SimpleCrawler
         eql? other_link
       end
 
+      def as_json
+        {
+          uri: uri.to_s
+        }
+      end
+
     end
   end
 end

@@ -12,4 +12,10 @@ describe SimpleCrawler::Models::Link do
     expect(subject).to eql described_class.new(uri)
   end
 
+  it "should expose prepare for JSON output" do
+    expect(subject.as_json).to eq({
+      uri: "http://google.com/help"
+    })
+  end
+
 end

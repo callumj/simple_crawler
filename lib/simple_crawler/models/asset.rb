@@ -21,6 +21,13 @@ module SimpleCrawler
         eql? other_asset
       end
 
+      def as_json
+        {
+          uri: uri.to_s,
+          type: type
+        }
+      end
+
     end
   end
 end

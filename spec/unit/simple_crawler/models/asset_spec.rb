@@ -13,4 +13,11 @@ describe SimpleCrawler::Models::Asset do
     expect(subject).to eql described_class.new(uri, "image")
   end
 
+  it "should expose prepare for JSON output" do
+    expect(subject.as_json).to eq({
+      uri: "http://google.com/asset3.png",
+      type: "img"
+    })
+  end
+
 end
