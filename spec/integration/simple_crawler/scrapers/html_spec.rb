@@ -11,9 +11,9 @@ describe SimpleCrawler::Scrapers::HTML do
   it "should be able to understand callumj.com" do
     inst = create "callumj.com"
     expect(inst.assets).to eq([
-      ["http://fonts.googleapis.com/css?family=Source+Sans+Pro:400", ""],
-      ["style/style.css", ""],
-      ["http://metrix.callumj.com/metric/increment?key=callumj&subkey=index", ""]
+      ["http://fonts.googleapis.com/css?family=Source+Sans+Pro:400", "", "stylesheet"],
+      ["style/style.css", "", "stylesheet"],
+      ["http://metrix.callumj.com/metric/increment?key=callumj&subkey=index", "", "img"]
     ])
 
     expect(inst.links).to eq([
