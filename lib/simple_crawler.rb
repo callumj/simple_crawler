@@ -1,4 +1,6 @@
 require 'simple_crawler/errors'
+require 'simple_crawler/utils'
+
 require 'simple_crawler/models'
 
 require 'simple_crawler/global_queue'
