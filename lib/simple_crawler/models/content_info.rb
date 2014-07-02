@@ -2,25 +2,32 @@ module SimpleCrawler
   module Models
     class ContentInfo
 
-      attr_accessor :final_uri
+      attr_accessor :final_uri, :assets, :links
 
-      def initialize(final_uri, assets = nil, links = nil)
+      def initialize(final_uri, incoming_assets = nil, incoming_links = nil)
         self.final_uri = final_uri
-        @assets = Utils.set_from_possible_array assets, Asset
-        @links = Utils.set_from_possible_array links, Link
-      end
-
-      def assets
-        @assets.freeze
-      end
-
-      def links
-        @links.freeze
+        @assets = Utils.set_from_possible_array incoming_assets, Asset
+        @links = Utils.set_from_possible_array incoming_links, Link
       end
 
       def add_links(link_or_ary)
-        @links
+        add_object_type :links, Link, link_or_ary
       end
+
+      def add_assets(ass_or_ary)
+        add_object_type :assets, Asset, ass_or_ary
+      end
+
+      private
+
+        def add_object_type(target_attr, type, obj_or_ary)
+          ivar = instance_variable_get :"@#{target_attr}"
+          if obj_or_ary.is_a?(type)
+            ivar << obj_or_ary
+          else
+            ivar.merge obj_or_ary
+          end
+        end
 
     end
   end
