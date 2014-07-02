@@ -2,66 +2,27 @@ require 'spec_helper'
 
 describe SimpleCrawler::GlobalQueue do
 
-  before :each do
-    described_class.flush_instance!
-  end
+  let(:crawl_session) { SimpleCrawler::CrawlSession.new }
+  let(:default_init) { {crawl_session: crawl_session} }
 
-  describe ".setup_instance!" do
-
-    it "should setup a global instance" do
-      expect(described_class.instance).to be_nil
-
-      described_class.setup_instance! host_restriction: "SOME_THING"
-      expect(described_class.instance.host_restriction).to eq "SOME_THING"
-    end
-
-  end
+  let(:subject) { described_class.new default_init }
 
   describe "#new" do
 
-    it "should not permit another instance if a global instance is running" do
-      described_class.setup_instance! host_restriction: "SOME_THING"
-
+    it "should require a crawl_session" do
       expect do
-        described_class.new
-      end.to raise_error(SimpleCrawler::Errors::InstanceAlreadyRunning)
+        described_class.new some: :thing
+      end.to raise_error(ArgumentError, "A CrawlSession is required!")
     end
 
-    it "should pass in the host_restriction" do
-      inst = described_class.new some: :thing, host_restriction: "domain.com"
-      expect(inst.host_restriction).to eq "domain.com"
+    it "should pass in the crawl_session" do
+      inst = described_class.new default_init.merge(some: :thing, host_restriction: "domain.com")
+      expect(inst.crawl_session).to eq crawl_session
     end
 
     it "should initialise the basics" do
       expect(subject.known_uris).to be_a(Set)
       expect(subject.known_uris).to be_empty
-    end
-
-  end
-
-  describe "#valid_host?" do
-
-    it "should be true with no restriction" do
-      expect(subject).to be_valid_host(URI.parse("http://domain.com"))
-      expect(subject).to be_valid_host(URI.parse("http://enron.com"))
-    end
-
-    it "should be matching on string level when a string" do
-      inst = described_class.new host_restriction: "domain.com"
-      expect(inst).to be_valid_host(URI.parse("http://domain.com"))
-      expect(inst).to be_valid_host(URI.parse("http://DOMAIN.com"))
-
-      expect(inst).to_not be_valid_host(URI.parse("http://sub.domain.com"))
-      expect(inst).to_not be_valid_host(URI.parse("http://subdomain.com"))
-    end
-
-    it "should be matching on a regex level when a regexp" do
-      inst = described_class.new host_restriction: /(^|\.)domain.com/i
-      expect(inst).to be_valid_host(URI.parse("http://domain.com"))
-      expect(inst).to be_valid_host(URI.parse("http://DOMAIN.com"))
-      expect(inst).to be_valid_host(URI.parse("http://sub.domain.com"))
-
-      expect(inst).to_not be_valid_host(URI.parse("http://subdomain.com"))
     end
 
   end
@@ -84,7 +45,7 @@ describe SimpleCrawler::GlobalQueue do
 
     it "should check it is a valid_host and has not been visited before" do
       uri_a = Addressable::URI.parse "http://google.com/index.html"
-      expect(subject).to receive(:valid_host?).with(uri_a).and_return(true)
+      expect(crawl_session).to receive(:valid_host?).with(uri_a).and_return(true)
       expect(subject).to receive(:visited_before?).with(uri_a).and_return(false)
 
       expect(subject).to be_can_enqueue(uri_a)
@@ -92,7 +53,7 @@ describe SimpleCrawler::GlobalQueue do
 
     it "should be false if not a valid host" do
       uri_a = Addressable::URI.parse "http://google.com/index.html"
-      expect(subject).to receive(:valid_host?).with(uri_a).and_return(false)
+      expect(crawl_session).to receive(:valid_host?).with(uri_a).and_return(false)
       expect(subject).to_not receive(:visited_before?).with(uri_a)
 
       expect(subject).to_not be_can_enqueue(uri_a)
@@ -100,7 +61,7 @@ describe SimpleCrawler::GlobalQueue do
 
     it "should be false if visited before" do
       uri_a = Addressable::URI.parse "http://google.com/index.html"
-      expect(subject).to receive(:valid_host?).with(uri_a).and_return(true)
+      expect(crawl_session).to receive(:valid_host?).with(uri_a).and_return(true)
       expect(subject).to receive(:visited_before?).with(uri_a).and_return(true)
 
       expect(subject).to_not be_can_enqueue(uri_a)

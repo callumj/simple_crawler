@@ -29,4 +29,16 @@ describe SimpleCrawler::CrawlSession do
 
   end
 
+  describe "#queue" do
+
+    it "should return a GlobalQueue" do
+      expect(subject.queue).to be_a(SimpleCrawler::GlobalQueue)
+
+      inst = subject.queue
+      expect(subject.queue).to eq inst
+      expect(inst.crawl_session).to eq subject
+    end
+
+  end
+
 end

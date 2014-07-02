@@ -5,27 +5,11 @@ module SimpleCrawler
 
     class Node < Struct.new(:uri, :next); end
 
-    def self.setup_instance!(opts = {})
-      @@instance = new(opts)
-    end
-
-    def self.flush_instance!
-      @@instance = nil
-    end
-
-    def self.instance
-      if defined?(@@instance)
-        @@instance
-      else
-        nil
-      end
-    end
-
-    attr_reader :host_restriction, :known_uris
+    attr_reader :crawl_session, :known_uris
 
     def initialize(opts = {})
-      raise Errors::InstanceAlreadyRunning if self.class.instance
-      @host_restriction = opts[:host_restriction]
+      @crawl_session = opts[:crawl_session]
+      raise ArgumentError, "A CrawlSession is required!" unless @crawl_session.is_a?(CrawlSession)
       @head = nil
       @tail = nil
       @mutex = Mutex.new
@@ -33,13 +17,7 @@ module SimpleCrawler
     end
 
     def valid_host?(uri)
-      return false unless uri.scheme == "http" || uri.scheme == "https"
-      return true unless host_restriction
-      if host_restriction.is_a?(String)
-        host_restriction.downcase == uri.host.downcase
-      else
-        host_restriction.match(uri.host.downcase) != nil
-      end
+      self.crawl_session.valid_host? uri
     end
 
     def visited_before?(uri)

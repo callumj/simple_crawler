@@ -17,5 +17,9 @@ module SimpleCrawler
       end
     end
 
+    def queue
+      @queue ||= GlobalQueue.new crawl_session: self
+    end
+
   end
 end
