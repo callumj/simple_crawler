@@ -167,11 +167,14 @@ describe SimpleCrawler::GlobalQueue do
         uri8 = Addressable::URI.parse "http://googl0.com"
         uri9 = Addressable::URI.parse "http://googly.com"
 
-        Thread.new { subject.enqueue(uri6) }
-        Thread.new { subject.enqueue(uri4) }
-        Thread.new { subject.enqueue(uri7) }
-        Thread.new { subject.enqueue(uri8) }
-        Thread.new { subject.enqueue(uri9) }
+        t1 = Thread.new { subject.enqueue(uri6) }
+        t2 = Thread.new { subject.enqueue(uri4) }
+        t3 = Thread.new { subject.enqueue(uri7) }
+        t4 = Thread.new { subject.enqueue(uri8) }
+        t5 = Thread.new { subject.enqueue(uri9) }
+
+        while [t1, t2, t3, t4, t5].any? { |t| t.alive? }
+        end
 
         res = 3.times.map { subject.dequeue }
         expect(subject.dequeue).to be_nil
