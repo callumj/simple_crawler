@@ -1,10 +1,11 @@
 module SimpleCrawler
   class CrawlSession
 
-    attr_reader :host_restriction
+    attr_reader :host_restriction, :output_file
 
     def initialize(opts = {})
       @host_restriction = opts[:host_restriction]
+      @output_file      = opts[:output_file]
     end
 
     def valid_host?(uri)
@@ -17,8 +18,26 @@ module SimpleCrawler
       end
     end
 
+    def add_content(content_info)
+      results_store.add_content content_info
+      content_info.links.each do |l|
+        queue.enqueue l.uri
+      end
+    end
+
     def queue
       @queue ||= GlobalQueue.new crawl_session: self
+    end
+
+    def results_store
+      @results_store ||= ResultsStore.new crawl_session: self
+    end
+
+    def dump_results
+      raise "Output file not specified" unless @output_file
+      results_store.dump @output_file
+    rescue Exception => err
+      binding.pry
     end
 
   end

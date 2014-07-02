@@ -5,6 +5,7 @@ require 'simple_crawler/models'
 
 require 'simple_crawler/crawl_session'
 
+require 'simple_crawler/results_store'
 require 'simple_crawler/global_queue'
 require 'simple_crawler/downloader'
 require 'simple_crawler/scrapers'
