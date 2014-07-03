@@ -16,6 +16,8 @@ module SimpleCrawler
     def merge_uri_with_page(uri)
       uri = Addressable::URI.parse(uri) unless uri.is_a?(Addressable::URI)
       return final_uri.join uri
+    rescue Addressable::URI::InvalidURIError => err
+      raise Addressable::URI::InvalidURIError, "Failed merging '#{uri.to_s}' with '#{final_uri.to_s}'"
     end
 
     private

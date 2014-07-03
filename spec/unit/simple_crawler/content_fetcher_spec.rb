@@ -37,6 +37,18 @@ describe SimpleCrawler::ContentFetcher do
       expect(subject.merge_uri_with_page("?microsoft=unsure").to_s).to eq("http://callumj.com/a/b/index.html?microsoft=unsure")
     end
 
+    it "should handle invalid URI errors and provide more context" do
+      expect(Addressable::URI).to receive(:parse).with("http://callumj.com/a/b/index.html").and_call_original
+
+      expect(Addressable::URI).to receive(:parse).with("/test") do
+        raise Addressable::URI::InvalidURIError, "Some message"
+      end
+
+      expect do
+        subject.merge_uri_with_page("/test")
+      end.to raise_error(Addressable::URI::InvalidURIError, "Failed merging '/test' with 'http://callumj.com/a/b/index.html'")
+    end
+
   end
 
   describe "#content_info" do
