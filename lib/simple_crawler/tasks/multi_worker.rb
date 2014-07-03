@@ -7,6 +7,7 @@ module SimpleCrawler
       class Supervisor
 
         MAX_WORKERS = 50
+        SLEEP_FOR = 0.0001
 
         attr_accessor :session, :main_thread
 
@@ -25,20 +26,24 @@ module SimpleCrawler
             if session.queue.peek != nil
               workers_to_start = MAX_WORKERS - @active_workers.length
               workers_to_start.times do |i|
-                STDOUT.puts "Spawning worker #{i}"
+                SimpleCrawler.logger.debug "Spawning worker #{i}"
                 @active_workers << Thread.new { Worker.new.perform(session) }
               end
             end
 
-            sleep 0.001
+            sleep SLEEP_FOR
           end
 
-          STDOUT.puts "Crawl completed. Dumping results"
+          SimpleCrawler.logger.info "Crawl completed. Dumping results"
           session.dump_results
         end
 
         def clean_dead_workers
           @active_workers.select! { |t| good_worker?(t) }
+        end
+
+        def num_active_workers
+          @active_workers.length
         end
 
         def good_worker?(t)
