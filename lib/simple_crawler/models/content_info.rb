@@ -7,6 +7,7 @@ module SimpleCrawler
       attr_accessor :final_uri, :assets, :links
 
       def initialize(final_uri, incoming_assets = nil, incoming_links = nil)
+
         self.final_uri = final_uri
         @assets = Utils.set_from_possible_array incoming_assets, Asset
         @links = Utils.set_from_possible_array incoming_links, Link

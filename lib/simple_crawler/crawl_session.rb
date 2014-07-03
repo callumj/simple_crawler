@@ -21,7 +21,23 @@ module SimpleCrawler
       @output_file      = opts[:output_file]
     end
 
+    def relative_to(uri)
+      if initial_uri.nil?
+        return uri.is_a?(Addressable::URI) ? uri : Addressable::URI.parse(uri).normalize
+      end
+      initial_uri.route_to uri
+    end
+
+    def absolute_uri_to(uri)
+      parsed = uri.is_a?(Addressable::URI) ? uri : Addressable::URI.parse(uri).normalize
+      if initial_uri.nil?
+        return parsed
+      end
+      initial_uri.join parsed
+    end
+
     def valid_host?(uri)
+      return true if uri.relative?
       return false unless uri.scheme == "http" || uri.scheme == "https"
       return true unless host_restriction
       if host_restriction.is_a?(String)

@@ -3,19 +3,20 @@ require 'addressable/uri'
 module SimpleCrawler
   class ContentFetcher
 
-    attr_accessor :url
+    attr_accessor :url, :session
 
-    def initialize(url)
+    def initialize(url, session)
       @url = url
+      @session = session
     end
 
     def content_info
-      @content_info ||= Models::ContentInfo.new(final_uri, assets, links)
+      @content_info ||= Models::ContentInfo.new(relative_uri, assets, links)
     end
 
     def merge_uri_with_page(uri)
-      uri = Addressable::URI.parse(uri) unless uri.is_a?(Addressable::URI)
-      return final_uri.join uri
+      uri = Addressable::URI.parse(uri).normalize unless uri.is_a?(Addressable::URI)
+      return session.relative_to(final_uri.join(uri).normalize)
     rescue Addressable::URI::InvalidURIError => err
       return nil
     end
@@ -26,8 +27,19 @@ module SimpleCrawler
         @final_uri ||= Addressable::URI.parse(response.final_uri.to_s)
       end
 
+      def relative_uri
+        @relative_uri ||= begin
+          res = session.relative_to(final_uri)
+          if res.relative? && res.path.empty? && res.fragment.empty?
+            Addressable::URI.parse("/")
+          else
+            res
+          end
+        end
+      end
+
       def response
-        @response ||= Downloader.source_for url
+        @response ||= Downloader.source_for session.absolute_uri_to url
       end
 
       def parsed

@@ -2,26 +2,28 @@ require 'spec_helper'
 
 describe SimpleCrawler::ContentFetcher do
 
+  let(:session) { SimpleCrawler::CrawlSession.new }
+
   let(:url) { "http://callumj.com/a/b/index.html" }
   let(:dl) do
     double(:download_response).tap do |d|
       allow(d).to receive(:final_uri).and_return(URI.parse(url))
     end
   end
-  subject { described_class.new url }
+  subject { described_class.new url, session }
 
   before :each do
-    allow(SimpleCrawler::Downloader).to receive(:source_for).with(url).and_return(dl)
+    allow(SimpleCrawler::Downloader).to receive(:source_for).with(Addressable::URI.parse(url)).and_return(dl)
   end
 
   describe "#merge_uri_with_page" do
 
     it "should handle absolute links" do
-      expect(subject.merge_uri_with_page("http://microsoft.com").to_s).to eq("http://microsoft.com")
+      expect(subject.merge_uri_with_page("http://microsoft.com").to_s).to eq("http://microsoft.com/")
     end
 
     it "should handle scheme changes" do
-      expect(subject.merge_uri_with_page("//microsoft.com").to_s).to eq("http://microsoft.com")
+      expect(subject.merge_uri_with_page("//microsoft.com").to_s).to eq("http://microsoft.com/")
     end
 
     it "should handle relative URLs" do

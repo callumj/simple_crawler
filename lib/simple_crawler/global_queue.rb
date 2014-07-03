@@ -36,7 +36,9 @@ module SimpleCrawler
       res = @mutex.synchronize do
         next false unless can_enqueue? uri
 
-        @known_uris << cleanse_uri(uri)
+        clean = cleanse_uri(uri)
+        next false if clean.empty?
+        @known_uris << clean
         if @head.nil?
           @head = Node.new(uri)
           @tail = @head
