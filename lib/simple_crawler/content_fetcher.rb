@@ -52,7 +52,7 @@ module SimpleCrawler
         @links ||= begin
           parsed.links.map do |(uri, name)|
             f_uri = merge_uri_with_page(uri)
-            next unless final_uri
+            next unless f_uri
             Models::Link.new(f_uri)
           end.compact
         end
