@@ -1,9 +1,22 @@
 module SimpleCrawler
   class CrawlSession
 
-    attr_reader :host_restriction, :output_file
+    attr_reader :host_restriction, :output_file, :initial_url, :initial_uri
 
     def initialize(opts = {})
+      @initial_url = opts[:initial_url]
+
+      if @initial_url
+        @initial_uri = Addressable::URI.parse(@initial_url).normalize
+
+        if @initial_uri.path.empty?
+          @initial_uri.path = "/"
+        end
+
+        @initial_url = @initial_uri.to_s
+        opts[:host_restriction] = initial_uri.host
+      end
+
       @host_restriction = opts[:host_restriction]
       @output_file      = opts[:output_file]
     end
@@ -26,7 +39,9 @@ module SimpleCrawler
     end
 
     def queue
-      @queue ||= GlobalQueue.new crawl_session: self
+      @queue ||= GlobalQueue.new(crawl_session: self).tap do |q|
+        q.enqueue initial_uri if initial_uri
+      end
     end
 
     def results_store
