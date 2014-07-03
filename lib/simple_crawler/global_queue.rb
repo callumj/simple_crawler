@@ -73,7 +73,7 @@ module SimpleCrawler
     private
 
       def cleanse_uri(uri)
-        cleansed = uri.to_s
+        cleansed = uri.to_s.dup
         cleansed.gsub!("##{uri.fragment}", "") if uri.fragment
         cleansed
       end
