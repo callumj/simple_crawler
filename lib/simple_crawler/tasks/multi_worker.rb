@@ -20,11 +20,15 @@ module SimpleCrawler
           @main_thread = Thread.new { self.keep_alive }
         end
 
+        def max_workers
+          @max_workers ||= !ENV["MAX_WORKERS"].nil? && !ENV["MAX_WORKERS"].empty? && ENV["MAX_WORKERS"].to_i || MAX_WORKERS
+        end
+
         def keep_alive
           while session.queue.peek != nil || @active_workers.any? { |t| good_worker?(t) }
             clean_dead_workers
             if session.queue.peek != nil
-              workers_to_start = MAX_WORKERS - @active_workers.length
+              workers_to_start = max_workers - @active_workers.length
               workers_to_start.times do |i|
                 SimpleCrawler.logger.debug "Spawning worker #{i}"
                 @active_workers << Thread.new { Worker.new.perform(session) }
