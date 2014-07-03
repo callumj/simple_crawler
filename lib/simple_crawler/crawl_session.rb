@@ -36,8 +36,6 @@ module SimpleCrawler
     def dump_results
       raise "Output file not specified" unless @output_file
       results_store.dump @output_file
-    rescue Exception => err
-      binding.pry
     end
 
   end
