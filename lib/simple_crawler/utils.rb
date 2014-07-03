@@ -8,7 +8,7 @@ module SimpleCrawler
         Set.new(obj)
       else
         Set.new.tap do |s|
-          if expected_type && s.is_a?(expected_type)
+          if expected_type && obj.is_a?(expected_type)
             s << obj
           end
         end

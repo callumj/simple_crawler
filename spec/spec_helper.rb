@@ -10,6 +10,18 @@ require 'pry'
 this_root = File.dirname(__FILE__)
 SPEC_ROOT = File.expand_path(this_root, "../")
 
+def create_asset(uri_s, type = "img")
+  SimpleCrawler::Models::Asset.new Addressable::URI.parse(uri_s), type
+end
+
+def create_link(uri_s)
+  SimpleCrawler::Models::Link.new Addressable::URI.parse(uri_s)
+end
+
+def create_content(uri_s, assets = nil, links = nil)
+  SimpleCrawler::Models::ContentInfo.new uri_s, assets, links
+end
+
 RSpec.configure do |config|
   config.mock_with :rspec
 
