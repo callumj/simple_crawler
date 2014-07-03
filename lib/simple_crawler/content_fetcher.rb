@@ -17,7 +17,7 @@ module SimpleCrawler
       uri = Addressable::URI.parse(uri) unless uri.is_a?(Addressable::URI)
       return final_uri.join uri
     rescue Addressable::URI::InvalidURIError => err
-      raise Addressable::URI::InvalidURIError, "Failed merging '#{uri.to_s}' with '#{final_uri.to_s}'"
+      return nil
     end
 
     private
@@ -41,16 +41,20 @@ module SimpleCrawler
       def assets
         @assets ||= begin
           parsed.assets.map do |(uri, name, type)|
-            Models::Asset.new(merge_uri_with_page(uri), type)
-          end
+            f_uri = merge_uri_with_page(uri)
+            next unless f_uri
+            Models::Asset.new(f_uri, type)
+          end.compact
         end
       end
 
       def links
         @links ||= begin
           parsed.links.map do |(uri, name)|
-            Models::Link.new(merge_uri_with_page(uri))
-          end
+            f_uri = merge_uri_with_page(uri)
+            next unless final_uri
+            Models::Link.new(f_uri)
+          end.compact
         end
       end
 

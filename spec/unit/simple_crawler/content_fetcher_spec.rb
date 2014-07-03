@@ -5,13 +5,13 @@ describe SimpleCrawler::ContentFetcher do
   let(:url) { "http://callumj.com/a/b/index.html" }
   let(:dl) do
     double(:download_response).tap do |d|
-      expect(d).to receive(:final_uri).and_return(URI.parse(url))
+      allow(d).to receive(:final_uri).and_return(URI.parse(url))
     end
   end
   subject { described_class.new url }
 
   before :each do
-    expect(SimpleCrawler::Downloader).to receive(:source_for).with(url).and_return(dl)
+    allow(SimpleCrawler::Downloader).to receive(:source_for).with(url).and_return(dl)
   end
 
   describe "#merge_uri_with_page" do
@@ -37,16 +37,12 @@ describe SimpleCrawler::ContentFetcher do
       expect(subject.merge_uri_with_page("?microsoft=unsure").to_s).to eq("http://callumj.com/a/b/index.html?microsoft=unsure")
     end
 
-    it "should handle invalid URI errors and provide more context" do
-      expect(Addressable::URI).to receive(:parse).with("http://callumj.com/a/b/index.html").and_call_original
-
+    it "should handle invalid URI errors to return nil" do
       expect(Addressable::URI).to receive(:parse).with("/test") do
         raise Addressable::URI::InvalidURIError, "Some message"
       end
 
-      expect do
-        subject.merge_uri_with_page("/test")
-      end.to raise_error(Addressable::URI::InvalidURIError, "Failed merging '/test' with 'http://callumj.com/a/b/index.html'")
+      expect(subject.merge_uri_with_page("/test")).to be_nil
     end
 
   end
