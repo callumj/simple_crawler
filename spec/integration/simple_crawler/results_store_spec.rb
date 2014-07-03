@@ -45,7 +45,6 @@ describe SimpleCrawler::ResultsStore do
       assets_file = JSON.parse(open("#{t}assets.json").read)
       links_file = JSON.parse(open("#{t}incoming_links.json").read)
 
-      binding.pry
       expect(mapped_file).to match_array([
         {
           "uri" => "http://google.com/index.html",
