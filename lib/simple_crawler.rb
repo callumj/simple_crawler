@@ -6,6 +6,7 @@ module SimpleCrawler
 
   require 'simple_crawler/crawl_session'
 
+  require 'simple_crawler/storage_adapters'
   require 'simple_crawler/results_store'
   require 'simple_crawler/global_queue'
   require 'simple_crawler/downloader'
