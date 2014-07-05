@@ -30,7 +30,7 @@ module SimpleCrawler
         generate_file results_store.contents.to_a, map_file
 
         style_file = "#{output_directory}/local_stylesheets.xml"
-        generate_file results_store.local_stylsheets.to_a, style_file
+        generate_file results_store.local_stylesheets.to_a, style_file
 
         assets_file = "#{output_directory}/assets.xml"
         generate_file generate_format(results_store.assets_usage), assets_file
@@ -46,61 +46,103 @@ module SimpleCrawler
         end
       end
 
-      def build_xml(obj, name = "item", root = true)
-        name[-1] = "" if name[-1] == "s"
-        buf = StringIO.new
-        buf << XML_HEAD if root
-        buf << "<#{name}_set>"
-        obj.each do |(item_or_key, possible_hsh_value)|
-          enum = possible_hsh_value || item_or_key
-          if enum.respond_to?(:as_json)
-            enum = enum.as_json
-          end
+      def build_xml(obj, name = "item")
+        buf = StringIO.new XML_HEAD
 
-          id_val = nil
-          if item_or_key.is_a?(String) || item_or_key.is_a?(Symbol)
-            id_val = item_or_key.to_s
-          else
-            id_val = enum[:id]
-          end
-
-          if id_val.nil?
-            buf << "<#{name}>"
-          else
-            buf << "<#{name} id=\"#{CGI.escapeHTML(id_val)}\">"
-          end
-
-          if enum.is_a?(Array)
-            buf << "<children>"
-            enum.each do |val|
-              buf << "<child>#{CGI.escapeHTML(val)}</child>"
-            end
-            buf << "</children>"
-          elsif enum.is_a?(String)
-             buf << "#{CGI.escapeHTML(enum)}" 
-          else
-            enum.each do |key, val|
-              next if key == :id
-              if val.is_a?(String)
-                if val.match(/[&<]/)
-                  buf << "<#{key}><![CDATA[#{val}]]></#{key}>"
-                else
-                  buf << "<#{key}>#{val}</#{key}>"
-                end
-              elsif !val.nil?
-                res = build_xml val, key.to_s, false
-                buf << res
-              end
-            end
-          end
-          buf << "</#{name}>"
+        if obj.respond_to?(:as_json)
+          obj = obj.as_json
         end
-        buf << "</#{name}_set>"
+
+        res = if obj.is_a?(Array)
+          produce_array obj, name
+        elsif obj.is_a?(Hash)
+          produce_hash obj, name
+        else
+          produce_element obj.to_s, name
+        end
+
+        buf << res
+
         buf.seek 0
         buf.read
       end
 
       private
+
+        def produce_hash(obj, tag = "item")
+          buf = StringIO.new
+
+          if obj[:id] != nil
+            buf << "<#{tag} id=\"#{CGI.escapeHTML(obj[:id])}\">"
+          else
+            buf << "<#{tag}>"
+          end
+
+          obj.each do |key, value|
+            if value.respond_to?(:as_json)
+              value = value.as_json
+            end
+
+            if value.is_a?(Hash)
+              buf << produce_hash(value, key.to_s)
+            elsif value.is_a?(Array)
+              buf << produce_array(value, key.to_s)
+            else
+              buf << produce_element(value.to_s, key.to_s)
+            end
+          end
+
+          buf << "</#{tag}>"
+
+          buf.seek 0
+          buf.read
+        end
+
+        def produce_array(ary, tag = "item")
+          buf = StringIO.new
+
+          inf = build_root_information tag
+          buf << "<#{inf[:root]}>"
+
+          ary.each do |item|
+            next if item.nil?
+
+            if item.respond_to?(:as_json)
+              item = item.as_json
+            end
+
+            if item.is_a?(Hash)
+              buf << produce_hash(item, inf[:tag])
+            elsif item.is_a?(Array)
+              buf << produce_array(item, inf[:tag])
+            else
+              buf << produce_element(item.to_s, inf[:tag])
+            end
+          end
+
+          buf << "</#{inf[:root]}>"
+
+          buf.seek 0
+          buf.read
+        end
+
+        def produce_element(text, tag = "item")
+          encoded_text = if text.match(/[&<]/)
+            "<![CDATA[#{text}]]>"
+          else
+            text
+          end
+          "<#{tag}>#{encoded_text}</#{tag}>"
+        end
+
+        def build_root_information(tag)
+          tag = tag.dup
+          tag[-1] = "" if tag[-1] == "s"
+          {
+            root: "#{tag}s",
+            tag: tag
+          }
+        end
 
         def generate_format(hsh)
           hsh.sort_by { |(uri, set)| -set.length }.each_with_object({}) do |(uri, set), hash|
