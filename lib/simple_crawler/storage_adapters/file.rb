@@ -5,7 +5,7 @@ module SimpleCrawler
   module StorageAdapters
     class File < Base
 
-      XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>"
+      XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>".freeze
 
       attr_accessor :output_directory
 
@@ -41,13 +41,13 @@ module SimpleCrawler
 
       def generate_file(contents, file)
         root = build_xml contents
-        ::File.open(file, "w") do |f|
+        ::File.open(file, "wb") do |f|
           f.write root
         end
       end
 
       def build_xml(obj, name = "item")
-        buf = StringIO.new XML_HEAD
+        buf = StringIO.new XML_HEAD.dup
 
         if obj.respond_to?(:as_json)
           obj = obj.as_json
@@ -61,10 +61,10 @@ module SimpleCrawler
           produce_element obj.to_s, name
         end
 
-        buf << res
+        buf.write res
 
         buf.seek 0
-        buf.read
+        buf.string
       end
 
       private
@@ -73,9 +73,9 @@ module SimpleCrawler
           buf = StringIO.new
 
           if obj[:id] != nil
-            buf << "<#{tag} id=\"#{CGI.escapeHTML(obj[:id])}\">"
+            buf.write "<#{tag} id=\"#{CGI.escapeHTML(obj[:id])}\">"
           else
-            buf << "<#{tag}>"
+            buf.write "<#{tag}>"
           end
 
           obj.each do |key, value|
@@ -84,25 +84,25 @@ module SimpleCrawler
             end
 
             if value.is_a?(Hash)
-              buf << produce_hash(value, key.to_s)
+              buf.write produce_hash(value, key.to_s)
             elsif value.is_a?(Array)
-              buf << produce_array(value, key.to_s)
+              buf.write produce_array(value, key.to_s)
             else
-              buf << produce_element(value.to_s, key.to_s)
+              buf.write produce_element(value.to_s, key.to_s)
             end
           end
 
-          buf << "</#{tag}>"
+          buf.write "</#{tag}>"
 
           buf.seek 0
-          buf.read
+          buf.string
         end
 
         def produce_array(ary, tag = "item")
           buf = StringIO.new
 
           inf = build_root_information tag
-          buf << "<#{inf[:root]}>"
+          buf.write "<#{inf[:root]}>"
 
           ary.each do |item|
             next if item.nil?
@@ -112,18 +112,18 @@ module SimpleCrawler
             end
 
             if item.is_a?(Hash)
-              buf << produce_hash(item, inf[:tag])
+              buf.write produce_hash(item, inf[:tag])
             elsif item.is_a?(Array)
-              buf << produce_array(item, inf[:tag])
+              buf.write produce_array(item, inf[:tag])
             else
-              buf << produce_element(item.to_s, inf[:tag])
+              buf.write produce_element(item.to_s, inf[:tag])
             end
           end
 
-          buf << "</#{inf[:root]}>"
+          buf.write "</#{inf[:root]}>"
 
           buf.seek 0
-          buf.read
+          buf.string
         end
 
         def produce_element(text, tag = "item")
