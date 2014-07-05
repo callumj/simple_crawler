@@ -28,6 +28,10 @@ module SimpleCrawler
         }
       end
 
+      def stylesheet?
+        type == "stylesheet"
+      end
+
     end
   end
 end

@@ -78,6 +78,51 @@ describe SimpleCrawler::CrawlSession do
 
   end
 
+  describe "#add_content" do
+
+    let(:content_info) { double :content_info }
+
+    before :each do
+      expect(subject.results_store).to receive(:add_content).with(content_info)
+    end
+
+    it "should add the content" do
+      expect(content_info).to receive(:links).and_return([])
+      expect(content_info).to receive(:assets).and_return([])
+
+      subject.add_content content_info
+    end
+
+    it "should queue the links" do
+      expect(content_info).to receive(:assets).and_return([])
+
+      l1 = double(:l1).tap { |d| expect(d).to receive(:uri).and_return("lu1") }
+      l2 = double(:l2).tap { |d| expect(d).to receive(:uri).and_return("lu2") }
+      expect(content_info).to receive(:links).and_return([l1, l2])
+      expect(subject.queue).to receive(:enqueue).with("lu1")
+      expect(subject.queue).to receive(:enqueue).with("lu2")
+
+      subject.add_content content_info
+    end
+
+    it "should queue only the stylesheet assets" do
+      expect(content_info).to receive(:links).and_return([])
+
+      l1 = double(:l1).tap do |d|
+        expect(d).to receive(:stylesheet?).and_return(false)
+      end
+      l2 = double(:l2).tap do |d|
+        expect(d).to receive(:stylesheet?).and_return(true)
+        expect(d).to receive(:uri).and_return("lu2")
+      end
+      expect(content_info).to receive(:assets).and_return([l1, l2])
+      expect(subject.queue).to receive(:enqueue).with("lu2")
+
+      subject.add_content content_info
+    end
+
+  end
+
   describe "#queue" do
 
     subject { described_class.new }

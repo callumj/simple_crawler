@@ -53,6 +53,10 @@ module SimpleCrawler
       content_info.links.each do |l|
         queue.enqueue l.uri
       end
+
+      content_info.assets.each do |a|
+        queue.enqueue a.uri if a.stylesheet?
+      end
     end
 
     def queue
