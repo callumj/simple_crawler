@@ -49,6 +49,10 @@ describe SimpleCrawler::ContentFetcher do
       expect(subject.merge_uri_with_page("/test")).to be_nil
     end
 
+    it "should not mess with moving backwards" do
+      expect(subject.merge_uri_with_page("../style/style.css").to_s).to eq("http://callumj.com/a/style/style.css")
+    end
+
   end
 
   describe "#can_be_downloaded?" do

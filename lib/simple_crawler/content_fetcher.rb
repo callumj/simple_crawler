@@ -18,7 +18,9 @@ module SimpleCrawler
     end
 
     def merge_uri_with_page(uri)
-      uri = Addressable::URI.parse(uri).normalize unless uri.is_a?(Addressable::URI)
+      unless uri.start_with?("../")
+        uri = Addressable::URI.parse(uri).normalize unless uri.is_a?(Addressable::URI)
+      end
       return session.relative_to(final_uri.join(uri).normalize)
     rescue Addressable::URI::InvalidURIError => err
       return nil
