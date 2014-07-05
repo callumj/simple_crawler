@@ -29,6 +29,9 @@ module SimpleCrawler
         map_file = "#{output_directory}/map.xml"
         generate_file results_store.contents.to_a, map_file
 
+        style_file = "#{output_directory}/local_stylesheets.xml"
+        generate_file results_store.local_stylsheets.to_a, style_file
+
         assets_file = "#{output_directory}/assets.xml"
         generate_file generate_format(results_store.assets_usage), assets_file
 

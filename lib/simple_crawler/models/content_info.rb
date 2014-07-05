@@ -34,6 +34,10 @@ module SimpleCrawler
         as_json.to_json(obj)
       end
 
+      def stylesheet?
+        final_uri.path.match(/\.css$/)
+      end
+
       private
 
         def add_object_type(target_attr, type, obj_or_ary)
