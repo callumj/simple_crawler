@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe SimpleCrawler::CrawlSession do
 
-  subject { described_class.new initial_url: "http://digitalocean.com" }
+  subject { described_class.new initial_url: "http://digitalocean.com", output: "/some/output" }
 
   describe "initializing" do
 
@@ -10,6 +10,10 @@ describe SimpleCrawler::CrawlSession do
       expect(subject.initial_uri).to eq(Addressable::URI.parse("http://digitalocean.com/"))
       expect(subject.initial_url).to eq("http://digitalocean.com/")
       expect(subject.host_restriction).to eq("digitalocean.com")
+    end
+
+    it "should accept an output" do
+      expect(subject.output).to eq("/some/output")
     end
 
   end
@@ -92,6 +96,30 @@ describe SimpleCrawler::CrawlSession do
 
       q = subject.queue
       expect(q.peek).to eq uri
+    end
+
+  end
+
+  describe "#storage" do
+
+    it "should return an initialized StorageAdapters::File" do
+      s_f = double(:s_f)
+      expect(SimpleCrawler::StorageAdapters::File).to receive(:new).with(crawl_session: subject, output: "/some/output").and_return(s_f)
+
+      expect(subject.storage).to eq s_f
+    end
+
+  end
+
+  describe "#dump_results" do
+
+    it "should send a sync to the storage" do
+      storage = double(:storage).tap do |s|
+        expect(s).to receive(:sync)
+      end
+      expect(subject).to receive(:storage).and_return(storage)
+
+      subject.dump_results
     end
 
   end

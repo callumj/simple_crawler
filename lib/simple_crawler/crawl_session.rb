@@ -1,7 +1,8 @@
 module SimpleCrawler
   class CrawlSession
 
-    attr_reader :host_restriction, :output_file, :initial_url, :initial_uri
+    attr_reader :host_restriction, :output, :initial_url, :initial_uri
+    attr_reader :storage
 
     def initialize(opts = {})
       @initial_url = opts[:initial_url]
@@ -18,7 +19,7 @@ module SimpleCrawler
       end
 
       @host_restriction = opts[:host_restriction]
-      @output_file      = opts[:output_file]
+      @output           = opts[:output]
     end
 
     def relative_to(uri)
@@ -64,9 +65,12 @@ module SimpleCrawler
       @results_store ||= ResultsStore.new crawl_session: self
     end
 
+    def storage
+      @storage ||= StorageAdapters::File.new crawl_session: self, output: @output
+    end
+
     def dump_results
-      raise "Output file not specified" unless @output_file
-      results_store.dump @output_file
+      storage.sync
     end
 
   end
