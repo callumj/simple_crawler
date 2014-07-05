@@ -1,4 +1,4 @@
-require 'spec_helper'
+  require 'spec_helper'
 
 describe SimpleCrawler::ResultsStore do
 
@@ -40,6 +40,16 @@ describe SimpleCrawler::ResultsStore do
     it "should enumerate the links" do
       expect(content_info).to receive(:links).and_return([])
       subject.add_content content_info
+    end
+
+    it "should add it to local_stylesheets if it is a stylesheet" do
+      expect(content_info).to receive(:assets).and_return([])
+      expect(content_info).to_not receive(:links)
+
+      expect(content_info).to receive(:stylesheet?).and_return(true)
+      expect do
+        subject.add_content content_info
+      end.to change { subject.local_stylesheets.include?(content_info) }.from(false).to(true)
     end
   end
 
