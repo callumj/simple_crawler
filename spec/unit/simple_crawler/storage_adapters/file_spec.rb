@@ -60,6 +60,33 @@ describe SimpleCrawler::StorageAdapters::File do
       end
     end
 
+    it "should be able to escape data" do
+      items = [
+        {id: "1", value: "val1"},
+        {id: "http://google.com/?val=1&val2=2", value: "val2"},
+        {id: "3", value: "http://google.com/?val=1&val2=2"},
+      ]
+
+      res = subject.build_xml items
+      parsed = Nokogiri::XML(res)
+      expect(parsed.xpath("//item_set/item").length).to eq 3
+
+      ["1", "3"].each do |id|
+        path = parsed.xpath("//item_set/item[@id=#{id}]")
+        expect(path.length).to eq 1
+        if id == "1"
+          expect(path.xpath("value").text).to eq "val#{id}"
+        else
+          child = path.xpath("value").first.children.first
+          expect(child).to be_a(Nokogiri::XML::CDATA)
+          expect(child.text).to eq "http://google.com/?val=1&val2=2"
+        end
+      end
+
+      path = parsed.xpath("//item_set/item[@id='http://google.com/?val=1&val2=2']")
+      expect(path.length).to eq 1
+    end
+
   end
 
 end
