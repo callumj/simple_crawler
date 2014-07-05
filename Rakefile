@@ -16,8 +16,8 @@ task simple_run: :setup do
   str = ENV["URL"]
   raise ArgumentError, "URL not provided as arg" if str.nil? || str.empty?
 
-  out = ENV["FILE"]
-  raise ArgumentError, "FILE not provided as arg" if out.nil? || out.empty?
+  out = ENV["OUTPUT"]
+  raise ArgumentError, "OUTPUT not provided as arg" if out.nil? || out.empty?
   SimpleCrawler::Tasks::SingleRun.run str, out
 end
 
@@ -27,8 +27,8 @@ task run: :setup do
   str = ENV["URL"]
   raise ArgumentError, "URL not provided as arg" if str.nil? || str.empty?
 
-  out = ENV["FILE"]
-  raise ArgumentError, "FILE not provided as arg" if out.nil? || out.empty?
+  out = ENV["OUTPUT"]
+  raise ArgumentError, "OUTPUT not provided as arg" if out.nil? || out.empty?
 
   require 'logger'
 

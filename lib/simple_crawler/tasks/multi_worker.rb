@@ -57,7 +57,7 @@ module SimpleCrawler
       end
 
       def self.run(initial_url, output_file)
-        session = CrawlSession.new initial_url: initial_url, output_file: output_file
+        session = CrawlSession.new initial_url: initial_url, output: output_file
         s = Supervisor.new session
         s.run
         s
