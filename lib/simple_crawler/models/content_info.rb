@@ -4,13 +4,15 @@ module SimpleCrawler
   module Models
     class ContentInfo
 
-      attr_accessor :final_uri, :assets, :links
+      attr_accessor :final_uri
+      attr_reader :assets, :links, :title
 
-      def initialize(final_uri, incoming_assets = nil, incoming_links = nil)
+      def initialize(final_uri, incoming_assets = nil, incoming_links = nil, incoming_title = nil)
 
         self.final_uri = final_uri
         @assets = Utils.set_from_possible_array incoming_assets, Asset
         @links = Utils.set_from_possible_array incoming_links, Link
+        @title = incoming_title
       end
 
       def add_links(link_or_ary)
@@ -25,6 +27,7 @@ module SimpleCrawler
         {
           id:     final_uri.to_s,
           uri:    final_uri.to_s,
+          title:  title,
           assets: assets.map(&:as_json),
           links:  links.map(&:as_json)
         }

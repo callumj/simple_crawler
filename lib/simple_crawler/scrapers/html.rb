@@ -15,6 +15,10 @@ module SimpleCrawler
         @document = Nokogiri::HTML(dl_resp.source)
       end
 
+      def title
+        @title ||= @document.xpath("//title").text
+      end
+
       def links
         @links ||= begin
           document.xpath("//a[@href]|//link[@href]").select do |node|

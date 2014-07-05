@@ -14,7 +14,7 @@ module SimpleCrawler
     end
 
     def content_info
-      @content_info ||= Models::ContentInfo.new(relative_uri, assets, links)
+      @content_info ||= Models::ContentInfo.new(relative_uri, assets, links, title)
     end
 
     def merge_uri_with_page(uri)
@@ -67,6 +67,10 @@ module SimpleCrawler
           raise Errors::UnknownContent unless p
           p
         end
+      end
+
+      def title
+        parsed.title
       end
 
       def assets

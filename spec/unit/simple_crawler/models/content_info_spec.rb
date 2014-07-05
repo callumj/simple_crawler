@@ -163,6 +163,11 @@ describe SimpleCrawler::Models::ContentInfo do
       expect(json_hash[:links]).to match_array([{ln1: true}, {ln2: true}])
     end
 
+    it "should expose the title" do
+      expect(subject).to receive(:title).and_return("SOME THING")
+      expect(json_hash[:title]).to eq "SOME THING"
+    end
+
   end
 
 end

@@ -107,6 +107,7 @@ describe SimpleCrawler::ContentFetcher do
         double(:scraped).tap do |s|
           expect(s).to receive(:assets).and_return(assets)
           expect(s).to receive(:links).and_return(links)
+          expect(s).to receive(:title).and_return("TITLE")
         end
       end
 
@@ -175,6 +176,10 @@ describe SimpleCrawler::ContentFetcher do
 
         inst = subject.content_info
         expect(inst.final_uri).to eq uri
+      end
+
+      it "should store a title" do
+        expect(subject.content_info.title).to eq "TITLE"
       end
     end
 

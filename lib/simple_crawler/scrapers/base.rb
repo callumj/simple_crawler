@@ -2,6 +2,10 @@ module SimpleCrawler
   module Scrapers
     class Base
 
+      def title
+        nil
+      end
+
       def links
         raise NotImplementedError
       end
