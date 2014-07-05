@@ -134,7 +134,9 @@ describe SimpleCrawler::Models::ContentInfo do
     let(:json_hash) { subject.as_json }
 
     it "should expose the URI" do
-      expect(json_hash[:uri]).to eq("http://callumj.com/index.html")
+      [:id, :uri].each do |k|
+        expect(json_hash[k]).to eq("http://callumj.com/index.html")
+      end
     end
 
     it "should expose the assets" do

@@ -23,7 +23,8 @@ module SimpleCrawler
 
       def as_json
         {
-          uri: final_uri.to_s,
+          id:     final_uri.to_s,
+          uri:    final_uri.to_s,
           assets: assets.map(&:as_json),
           links:  links.map(&:as_json)
         }
