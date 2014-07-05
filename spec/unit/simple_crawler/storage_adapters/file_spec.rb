@@ -11,6 +11,39 @@ describe SimpleCrawler::StorageAdapters::File do
 
   subject { described_class.new output: "/tmp/thing", crawl_session: crawl_session }
 
+  describe "#dump" do
+
+    it "should generate_file(s) for each type" do
+      expect(crawl_session.results_store).to receive(:contents).and_return([{contents: true}])
+      expect(crawl_session.results_store).to receive(:assets_usage).and_return([["h", ["a", "b"]]])
+      expect(crawl_session.results_store).to receive(:incoming_links).and_return([["j", ["c", "d"]]])
+
+      expect(subject).to receive(:generate_file).with([{contents: true}], "/tmp/thing/map.xml")
+      expect(subject).to receive(:generate_file).with({"h" => ["a", "b"]}, "/tmp/thing/assets.xml")
+      expect(subject).to receive(:generate_file).with({"j" => ["c", "d"]}, "/tmp/thing/incoming_links.xml")
+
+      subject.dump
+    end
+
+  end
+
+  describe "#generate_file" do
+
+    it "should build a root and write a file" do
+      output = double(:output)
+      contents = double(:contents)
+      file_block = double(:file).tap do |f|
+        expect(f).to receive(:write).with(output)
+      end
+      expect(subject).to receive(:build_xml).with(contents).and_return(output)
+
+      expect(::File).to receive(:open).with("ffffile", "w").and_yield(file_block)
+
+      subject.generate_file contents, "ffffile"
+    end
+
+  end
+
   describe "#build_xml" do
 
     it "should be able to build a simple root array" do
