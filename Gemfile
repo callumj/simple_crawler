@@ -4,6 +4,7 @@ gem 'faraday'
 gem 'faraday_middleware'
 
 gem 'nokogiri'
+gem 'mime-types'
 
 gem 'addressable'
 

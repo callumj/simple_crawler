@@ -51,6 +51,33 @@ describe SimpleCrawler::ContentFetcher do
 
   end
 
+  describe "#can_be_downloaded?" do
+
+    it "should be true if the extension cannot be located" do
+      subject.url = "http://google.com"
+      expect(subject).to be_can_be_downloaded
+    end
+
+    it "should be true if it doesn't know what to do with the extension" do
+      expect(MIME::Types).to receive(:type_for).with(".html").and_return([])
+      subject.url = "http://google.com/index.html?ssss=okay"
+      expect(subject).to be_can_be_downloaded
+    end
+
+    it "should be false if one matched mime type is invalid" do
+      described_class::BANNED_MEDIA_TYPES.each do |m|
+        set = [
+          double(:mime_type).tap { |d| expect(d).to receive(:media_type).and_return("text") },
+          double(:mime_type).tap { |d| expect(d).to receive(:media_type).and_return(m) }
+        ]
+        expect(MIME::Types).to receive(:type_for).with(".html").and_return(set)
+        subject.url = "http://google.com/index.html?ssss=okay"
+        expect(subject).to_not be_can_be_downloaded
+      end
+    end
+
+  end
+
   describe "#content_info" do
 
     context "unknown content" do

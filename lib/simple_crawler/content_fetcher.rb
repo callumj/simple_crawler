@@ -1,9 +1,12 @@
 require 'addressable/uri'
+require 'mime-types'
 
 module SimpleCrawler
   class ContentFetcher
 
     attr_accessor :url, :session
+
+    BANNED_MEDIA_TYPES = Set.new(["application", "video", "audio", "imae"])
 
     def initialize(url, session)
       @url = url
@@ -21,7 +24,20 @@ module SimpleCrawler
       return nil
     end
 
+    def can_be_downloaded?
+      ext_name = this_uri.path.match(/\.([A-Za-z]+)(?:\?|$)/)
+      return true unless ext_name && ext_name[1]
+      
+      lookups = MIME::Types.type_for(".#{ext_name[1]}")
+      return true if lookups.empty?
+      return !lookups.any? { |l| BANNED_MEDIA_TYPES.include?(l.media_type) }
+    end
+
     private
+
+      def this_uri
+        @this_uri ||= @url.is_a?(Addressable::URI) ? @url : Addressable::URI.parse(@url).normalize
+      end
 
       def final_uri
         @final_uri ||= Addressable::URI.parse(response.final_uri.to_s)
@@ -39,6 +55,7 @@ module SimpleCrawler
       end
 
       def response
+        raise Errors::UnknownContent unless can_be_downloaded?
         @response ||= Downloader.source_for session.absolute_uri_to url
       end
 

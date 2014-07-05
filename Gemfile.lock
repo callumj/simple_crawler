@@ -9,6 +9,7 @@ GEM
     faraday_middleware (0.9.1)
       faraday (>= 0.7.4, < 0.10)
     method_source (0.8.2)
+    mime-types (2.3)
     mini_portile (0.6.0)
     multipart-post (2.0.0)
     nokogiri (1.6.2.1)
@@ -39,6 +40,7 @@ DEPENDENCIES
   addressable
   faraday
   faraday_middleware
+  mime-types
   nokogiri
   pry
   rake
