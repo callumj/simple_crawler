@@ -20,4 +20,11 @@ describe SimpleCrawler::Models::Asset do
     })
   end
 
+  it "should delegate to TypeHelper if the type is not known" do
+    inst = described_class.new uri, nil
+    expect(SimpleCrawler::TypeHelper).to receive(:type_from_name).with("/asset3.png").and_return("who_knows")
+
+    expect(inst.type).to eq("who_knows")
+  end
+
 end

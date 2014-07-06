@@ -2,7 +2,7 @@ module SimpleCrawler
   module Models
     class Asset
 
-      attr_reader :uri, :type
+      attr_reader :uri
 
       def initialize(uri, type)
         @uri = uri
@@ -19,6 +19,10 @@ module SimpleCrawler
 
       def ==(other_asset)
         eql? other_asset
+      end
+
+      def type
+        @type ||= TypeHelper.type_from_name uri.path
       end
 
       def as_json
