@@ -9,7 +9,9 @@ module SimpleCrawler
       res = content.content_info
       session.add_content res
     rescue Errors::UnknownContent
-      SimpleCrawler.logger.warn "\tDo not know how to handle this."
+      SimpleCrawler.logger.debug "\tDo not know how to handle this."
+    rescue StandardError => err
+      SimpleCrawler.logger.error "Encountered error: #{err.to_s}"
     end
 
   end
