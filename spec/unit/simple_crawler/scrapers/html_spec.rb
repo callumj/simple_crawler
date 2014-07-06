@@ -1,5 +1,31 @@
 require 'spec_helper'
 
+RSpec.shared_examples "a embedded style" do
+  it "should pass the inline sheets into the CSS scraper" do
+    expect(download_response).to receive(:headers).and_return(:headers).twice
+    expect(download_response).to receive(:status).and_return(:status).twice
+    expect(download_response).to receive(:final_uri).and_return(:final_uri).twice
+
+    resp1 = double(:resp1)
+    expect(SimpleCrawler::Models::DownloadResponse).to receive(:new).with("node1_text", :headers, :status, :final_uri).and_return(resp1)
+    resp2 = double(:resp2)
+    expect(SimpleCrawler::Models::DownloadResponse).to receive(:new).with("node2_text", :headers, :status, :final_uri).and_return(resp2)
+
+    css1 = double(:css1).tap do |c|
+      expect(c).to receive(:assets).and_return(["css1"])
+    end
+
+    css2 = double(:css2).tap do |c|
+      expect(c).to receive(:assets).and_return(["css2"])
+    end
+
+    expect(SimpleCrawler::Scrapers::CSS).to receive(:new).with(resp1).and_return(css1)
+    expect(SimpleCrawler::Scrapers::CSS).to receive(:new).with(resp2).and_return(css2)
+
+    expect(subject.assets).to include "css1", "css2"
+  end
+end
+
 describe SimpleCrawler::Scrapers::HTML do
 
   let(:download_response) do
@@ -121,6 +147,13 @@ describe SimpleCrawler::Scrapers::HTML do
     end
 
     before :each do
+      @inline_sheets ||= []
+      @style_nodes ||= []
+      expect(nokogiri_doc).to receive(:xpath).with("//style[@type='text/css']")
+      .and_return(@inline_sheets)
+      expect(nokogiri_doc).to receive(:xpath).with("//*[@style]")
+      .and_return(@style_nodes)
+
       expect(nokogiri_doc).to receive(:xpath).with("//link[@href]|//img[@src]|//script[@src]")
       .and_return([nd1, nd2, nd3, nd4, nd5])
     end
@@ -183,6 +216,53 @@ describe SimpleCrawler::Scrapers::HTML do
         expect(subject.assets).to include ["/App_Themes/Datacom/scripts/libs/html5shiv.js", "", "script"], ["/App_Themes/Datacom/scripts/libs/html5shiv-printshiv.js", "", "script"]
       end
 
+    end
+
+    context "with inline sheets" do
+
+      let(:node1) do
+        double(:node1).tap do |n|
+          expect(n).to receive(:text).and_return("node1_text")
+        end
+      end
+
+      let(:node2) do
+        double(:node2).tap do |n|
+          expect(n).to receive(:text).and_return("node2_text")
+        end
+      end
+
+      before :each do
+        expect(nokogiri_doc).to receive(:xpath).with("//head/comment()").and_return([])
+
+        @inline_sheets << node1
+        @inline_sheets << node2
+      end
+
+      it_behaves_like "a embedded style"
+    end
+
+    context "with style nodes" do
+      let(:node1) do
+        double(:node1).tap do |n|
+          expect(n).to receive(:[]).with("style").and_return("node1_text")
+        end
+      end
+
+      let(:node2) do
+        double(:node2).tap do |n|
+          expect(n).to receive(:[]).with("style").and_return("node2_text")
+        end
+      end
+
+      before :each do
+        expect(nokogiri_doc).to receive(:xpath).with("//head/comment()").and_return([])
+
+        @style_nodes << node1
+        @style_nodes << node2
+      end
+
+      it_behaves_like "a embedded style"
     end
 
   end

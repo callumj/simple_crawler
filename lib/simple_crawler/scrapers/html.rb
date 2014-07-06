@@ -44,12 +44,26 @@ module SimpleCrawler
             mini_doc = Nokogiri::HTML.parse text
             base += extract_from_assets mini_doc
           end
+
+          document.xpath("//style[@type='text/css']").each do |node|
+            append_from_css node.text, base
+          end
+
+          document.xpath("//*[@style]").each do |node|
+            append_from_css node["style"], base
+          end
           
           base
         end
       end
 
       private
+
+        def append_from_css(css_content, dest)
+          mock_doc = Models::DownloadResponse.new(css_content, dl_resp.headers, dl_resp.status, dl_resp.final_uri)
+          sc = CSS.new(mock_doc)
+          dest.concat sc.assets
+        end
 
         def extract_from_assets(doc)
           doc.xpath("//link[@href]|//img[@src]|//script[@src]").select do |node|
