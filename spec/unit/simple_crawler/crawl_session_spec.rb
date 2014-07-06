@@ -81,12 +81,16 @@ describe SimpleCrawler::CrawlSession do
   describe "#add_content" do
 
     let(:content_info) { double :content_info }
+    let(:storage) { double :storage }
 
     before :each do
-      expect(subject.results_store).to receive(:add_content).with(content_info)
+      allow(subject).to receive(:storage).and_return(storage)
+      expect(subject.results_store).to receive(:add_content).with(content_info).at_least(:once)
     end
 
     it "should add the content" do
+      expect(subject.storage).to receive(:records_changed).with(1).and_return(false)
+      
       expect(content_info).to receive(:links).and_return([])
       expect(content_info).to receive(:assets).and_return([])
 
@@ -94,6 +98,8 @@ describe SimpleCrawler::CrawlSession do
     end
 
     it "should queue the links" do
+      expect(subject.storage).to receive(:records_changed).with(1).and_return(false)
+
       expect(content_info).to receive(:assets).and_return([])
 
       l1 = double(:l1).tap { |d| expect(d).to receive(:uri).and_return("lu1") }
@@ -106,6 +112,8 @@ describe SimpleCrawler::CrawlSession do
     end
 
     it "should queue only the stylesheet assets" do
+      expect(subject.storage).to receive(:records_changed).with(1).and_return(false)
+
       expect(content_info).to receive(:links).and_return([])
 
       l1 = double(:l1).tap do |d|
@@ -118,6 +126,18 @@ describe SimpleCrawler::CrawlSession do
       expect(content_info).to receive(:assets).and_return([l1, l2])
       expect(subject.queue).to receive(:enqueue).with("lu2")
 
+      subject.add_content content_info
+    end
+
+    it "should notify storage" do
+      expect(subject.storage).to receive(:records_changed).with(1).and_return(false).twice
+      expect(subject.storage).to receive(:records_changed).with(2).and_return(true)
+
+      expect(content_info).to receive(:links).and_return([]).exactly(3).times
+      expect(content_info).to receive(:assets).and_return([]).exactly(3).times
+
+      subject.add_content content_info
+      subject.add_content content_info
       subject.add_content content_info
     end
 

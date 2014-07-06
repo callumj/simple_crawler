@@ -20,6 +20,9 @@ module SimpleCrawler
 
       @host_restriction = opts[:host_restriction]
       @output           = opts[:output]
+      @records_changed  = 0
+
+      @sync_lock = Mutex.new
     end
 
     def relative_to(uri)
@@ -56,6 +59,12 @@ module SimpleCrawler
 
       content_info.assets.each do |a|
         queue.enqueue a.uri if a.stylesheet?
+      end
+
+      @sync_lock.synchronize do
+        @records_changed += 1
+        flush = storage.records_changed @records_changed
+        @records_changed = 0 if flush
       end
     end
 
