@@ -52,6 +52,13 @@ module SimpleCrawler
     end
 
     def add_content(content_info)
+      if results_store.contents.empty?
+        if !content_info.final_uri.relative?
+          @initial_uri = content_info.final_uri
+          @host_restriction = @initial_uri.host
+        end
+      end
+
       results_store.add_content content_info
       content_info.links.each do |l|
         queue.enqueue l.uri

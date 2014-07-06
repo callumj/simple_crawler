@@ -80,7 +80,15 @@ describe SimpleCrawler::CrawlSession do
 
   describe "#add_content" do
 
-    let(:content_info) { double :content_info }
+    before :each do
+      @final_uri ||= Addressable::URI.parse("/index.html")
+    end
+
+    let(:content_info) do
+      double(:content_info).tap do |c|
+        allow(c).to receive(:final_uri).and_return(@final_uri)
+      end
+    end
     let(:storage) { double :storage }
 
     before :each do
@@ -139,6 +147,21 @@ describe SimpleCrawler::CrawlSession do
       subject.add_content content_info
       subject.add_content content_info
       subject.add_content content_info
+    end
+
+    it "should switch the initial_uri if a absolute URI comes in when the results are empty" do
+      final_uri = Addressable::URI.parse("http://worldcom.com/page.html")
+      expect(content_info).to receive(:final_uri).and_return(final_uri).twice
+      expect(subject.results_store.contents).to receive(:empty?).and_return(true)
+
+      expect(subject.storage).to receive(:records_changed).with(1).and_return(false)
+      
+      expect(content_info).to receive(:links).and_return([])
+      expect(content_info).to receive(:assets).and_return([])
+
+      expect do
+        subject.add_content content_info
+      end.to change { subject.initial_uri }.to(final_uri)
     end
 
   end
