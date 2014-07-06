@@ -36,9 +36,9 @@ task run: :setup do
 
   s_thread = SimpleCrawler::Tasks::MultiWorker.run str, out
   until s_thread.main_thread.status == nil || s_thread.main_thread.status == false
-    print "\rActive workers: #{s_thread.num_active_workers} Results: #{s_thread.session.results_store.contents.length}"
+    STDERR.print "\rActive workers: #{s_thread.num_active_workers} Results: #{s_thread.session.results_store.contents.length}"
     sleep 0.001
-    print 100.times.map { " " }.join
+    STDERR.print 100.times.map { " " }.join
   end
   puts
 end
