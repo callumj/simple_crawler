@@ -39,7 +39,7 @@ describe SimpleCrawler::StorageAdapters::File do
       end
       expect(subject).to receive(:build_xml).with(contents).and_return(output)
 
-      expect(::File).to receive(:open).with("ffffile", "w").and_yield(file_block)
+      expect(::File).to receive(:open).with("ffffile", "wb").and_yield(file_block)
 
       subject.generate_file contents, "ffffile"
     end
