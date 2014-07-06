@@ -35,6 +35,9 @@ task run: :setup do
   SimpleCrawler.logger.level = Logger::INFO
 
   s_thread = SimpleCrawler::Tasks::MultiWorker.run str, out
+
+  trap("SIGINT") { s_thread.shutdown! }
+
   until s_thread.main_thread.status == nil || s_thread.main_thread.status == false
     STDERR.print "\rActive workers: #{s_thread.num_active_workers} Results: #{s_thread.session.results_store.contents.length}"
     sleep 0.001

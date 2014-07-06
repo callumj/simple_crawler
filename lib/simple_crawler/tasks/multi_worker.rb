@@ -14,6 +14,7 @@ module SimpleCrawler
         def initialize(session)
           @session = session
           @active_workers = []
+          @active = true
         end
 
         def run
@@ -25,9 +26,9 @@ module SimpleCrawler
         end
 
         def keep_alive
-          while session.queue.peek != nil || any_active_workers?
+          while (@active && session.queue.peek != nil) || any_active_workers?
             clean_dead_workers
-            if session.queue.peek != nil
+            if session.queue.peek != nil && @active
               workers_to_start = max_workers - @active_workers.length
               workers_to_start.times do |i|
                 SimpleCrawler.logger.debug "Spawning worker #{i}"
@@ -56,6 +57,11 @@ module SimpleCrawler
 
         def good_worker?(t)
           t.status == "sleep" || t.status == "run"
+        end
+
+        def shutdown!
+          @active = false
+          Thread.new { SimpleCrawler.logger.warn "Shutdown received, waiting for workers to finish." }
         end
 
       end
