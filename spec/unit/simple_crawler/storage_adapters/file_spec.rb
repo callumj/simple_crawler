@@ -11,6 +11,22 @@ describe SimpleCrawler::StorageAdapters::File do
 
   subject { described_class.new output: "/tmp/thing", crawl_session: crawl_session }
 
+  describe "#records_changed" do
+
+    it "should not run until there has been enough records" do
+      expect(subject).to_not receive(:sync)
+      (1...described_class::SYNC_AT).each do |t|
+        expect(subject.records_changed(t)).to eq false
+      end
+    end
+
+    it "should run once the magic number has been reached" do
+      expect(subject).to receive(:sync)
+      expect(subject.records_changed(described_class::SYNC_AT)).to eq true
+    end
+
+  end
+
   describe "#dump" do
 
     it "should generate_file(s) for each type" do

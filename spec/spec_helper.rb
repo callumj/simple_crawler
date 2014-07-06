@@ -7,6 +7,8 @@ require 'rspec/mocks'
 
 require 'pry'
 
+ENV["LOG"] = "NONE"
+
 this_root = File.dirname(__FILE__)
 SPEC_ROOT = File.expand_path(this_root, "../")
 

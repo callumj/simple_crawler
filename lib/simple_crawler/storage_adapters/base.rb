@@ -23,6 +23,10 @@ module SimpleCrawler
       def finish_up
       end
 
+      def records_changed(num)
+        false
+      end
+
     end
   end
 end

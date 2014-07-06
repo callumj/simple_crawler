@@ -6,6 +6,7 @@ module SimpleCrawler
     class File < Base
 
       XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>".freeze
+      SYNC_AT = 100
 
       attr_accessor :output_directory
 
@@ -23,6 +24,13 @@ module SimpleCrawler
 
       def finish_up
         dump
+      end
+
+      def records_changed(num)
+        return false unless num >= SYNC_AT
+        SimpleCrawler.logger.warn "Writing to output"
+        sync
+        true
       end
 
       def dump
