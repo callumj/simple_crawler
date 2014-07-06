@@ -1,6 +1,7 @@
 module SimpleCrawler
   require 'simple_crawler/errors'
   require 'simple_crawler/utils'
+  require 'simple_crawler/type_helper'
 
   require 'simple_crawler/models'
 
