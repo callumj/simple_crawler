@@ -25,7 +25,7 @@ module SimpleCrawler
         end
 
         def keep_alive
-          while session.queue.peek != nil || @active_workers.any? { |t| good_worker?(t) }
+          while session.queue.peek != nil || any_active_workers?
             clean_dead_workers
             if session.queue.peek != nil
               workers_to_start = max_workers - @active_workers.length
@@ -40,6 +40,10 @@ module SimpleCrawler
 
           SimpleCrawler.logger.info "Crawl completed. Dumping results"
           session.dump_results
+        end
+
+        def any_active_workers?
+          @active_workers.any? { |t| good_worker?(t) }
         end
 
         def clean_dead_workers
