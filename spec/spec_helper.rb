@@ -10,7 +10,7 @@ require 'pry'
 this_root = File.dirname(__FILE__)
 SPEC_ROOT = File.expand_path(this_root, "../")
 
-def create_asset(uri_s, type = "img")
+def create_asset(uri_s, type = "image")
   SimpleCrawler::Models::Asset.new Addressable::URI.parse(uri_s), type
 end
 
