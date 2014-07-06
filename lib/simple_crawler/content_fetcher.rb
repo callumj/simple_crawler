@@ -6,8 +6,6 @@ module SimpleCrawler
 
     attr_accessor :url, :session
 
-    BANNED_MEDIA_TYPES = Set.new(["application", "video", "audio", "imae"])
-
     def initialize(url, session)
       @url = url
       @session = session
@@ -27,12 +25,7 @@ module SimpleCrawler
     end
 
     def can_be_downloaded?
-      ext_name = this_uri.path.match(/\.([A-Za-z]+)(?:\?|$)/)
-      return true unless ext_name && ext_name[1]
-      
-      lookups = MIME::Types.type_for(".#{ext_name[1]}")
-      return true if lookups.empty?
-      return !lookups.any? { |l| BANNED_MEDIA_TYPES.include?(l.media_type) }
+      TypeHelper.can_be_downloaded? this_uri.path
     end
 
     private
