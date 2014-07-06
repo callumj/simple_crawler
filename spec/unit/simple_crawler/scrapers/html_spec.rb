@@ -136,7 +136,7 @@ describe SimpleCrawler::Scrapers::HTML do
       end
 
       it "should include hrefs" do
-        expect(subject.assets).to include ["/a_href", "A", "img"], ["http://google.com/a_href", "B", "img"]
+        expect(subject.assets).to include ["/a_href", "A", "image"], ["http://google.com/a_href", "B", "image"]
       end
 
       it "should include stylesheets or icons" do

@@ -28,16 +28,8 @@ module SimpleCrawler
             next if matched.start_with?("data:")
             matched.gsub! /(^['"])|(['"]$)/, ""
 
-            type = nil
-            if matched.match(/\.css(\?|$|\/)/)
-              type = "stylesheet"
-            elsif matched.match(/\.(png|gif|jpg|jpeg|bmp|tiff|tif|pneg)(\?|$|\/)/)
-              type = "img"
-            elsif matched.match(/\.(eot|woff|ttf|svg)(\?|$|\/)/)
-              type = "font"
-            else
-              type = "other"
-            end
+            uri = Addressable::URI.parse matched
+            type = TypeHelper.type_from_name uri.path
 
             list << [matched, type]
           end

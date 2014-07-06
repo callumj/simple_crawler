@@ -13,7 +13,7 @@ describe SimpleCrawler::Scrapers::HTML do
     expect(inst.assets).to eq([
       ["http://fonts.googleapis.com/css?family=Source+Sans+Pro:400", "", "stylesheet"],
       ["style/style.css", "", "stylesheet"],
-      ["http://metrix.callumj.com/metric/increment?key=callumj&subkey=index", "", "img"]
+      ["http://metrix.callumj.com/metric/increment?key=callumj&subkey=index", "", "image"]
     ])
 
     expect(inst.links).to eq([

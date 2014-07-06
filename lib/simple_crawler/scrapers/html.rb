@@ -57,6 +57,7 @@ module SimpleCrawler
             SUPPORTED_LINK_ASSETS.include?(node["rel"])
           end.map do |node|
             type = node["rel"].nil? ? node.name : node["rel"]
+            type = TypeHelper::ASSET_IMAGE_TYPE if type == "img"
             [node["href"] || node["src"], node.text.strip, type]
           end.uniq { |(href, text)| href }
         end
