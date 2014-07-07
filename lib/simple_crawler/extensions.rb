@@ -1,0 +1,1 @@
+require 'simple_crawler/extensions/missing_title'

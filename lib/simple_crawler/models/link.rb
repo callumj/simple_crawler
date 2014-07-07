@@ -2,6 +2,8 @@ module SimpleCrawler
   module Models
     class Link
 
+      include Extensions::MissingTitle
+
       attr_reader :uri
 
       def initialize(uri)
@@ -22,8 +24,13 @@ module SimpleCrawler
 
       def as_json
         {
-          uri: uri.to_s
+          uri: uri.to_s,
+          title: title
         }
+      end
+
+      def title
+        @title ||= fallback_to_missing_title
       end
 
     end

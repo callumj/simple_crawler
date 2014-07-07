@@ -4,8 +4,10 @@ module SimpleCrawler
   module Models
     class ContentInfo
 
+      include Extensions::MissingTitle
+
       attr_accessor :final_uri
-      attr_reader :assets, :links, :title
+      attr_reader :assets, :links
 
       def initialize(final_uri, incoming_assets = nil, incoming_links = nil, incoming_title = nil)
 
@@ -39,6 +41,18 @@ module SimpleCrawler
 
       def stylesheet?
         final_uri.path.match(/\.css$/)
+      end
+
+      def title
+        @title || fallback_to_missing_title
+      end
+
+      def incoming_title
+        @title
+      end
+
+      def uri
+        @final_uri
       end
 
       private
