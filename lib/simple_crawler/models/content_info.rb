@@ -7,6 +7,7 @@ module SimpleCrawler
       include Extensions::MissingTitle
 
       attr_accessor :final_uri
+      attr_accessor :original_uri
       attr_reader :assets, :links
 
       def initialize(final_uri, incoming_assets = nil, incoming_links = nil, incoming_title = nil)

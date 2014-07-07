@@ -9,7 +9,8 @@ module SimpleCrawler
         MAX_WORKERS = 50
         SLEEP_FOR = 0.0001
 
-        attr_accessor :session, :main_thread
+        attr_accessor :run_forever
+        attr_reader :session, :main_thread
 
         def initialize(session)
           @session = session
@@ -26,7 +27,7 @@ module SimpleCrawler
         end
 
         def keep_alive
-          while (@active && session.queue.peek != nil) || any_active_workers?
+          while (@active && session.queue.peek != nil) || any_active_workers? || (@active && run_forever)
             clean_dead_workers
             if session.queue.peek != nil && @active
               workers_to_start = max_workers - @active_workers.length
@@ -69,6 +70,15 @@ module SimpleCrawler
       def self.run(initial_url, output_file)
         session = CrawlSession.new initial_url: initial_url, output: output_file
         s = Supervisor.new session
+        s.run
+        s
+      end
+
+      def self.client(host, port)
+        connection = Client::Connection.new port, host
+        session = Client::CrawlSession.new connection
+        s = Supervisor.new session
+        s.run_forever = true
         s.run
         s
       end

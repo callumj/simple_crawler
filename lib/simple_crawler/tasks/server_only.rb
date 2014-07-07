@@ -1,15 +1,14 @@
 module SimpleCrawler
   module Tasks
-    class SingleRun
+    class ServerOnly
 
       def self.run(initial_url, output_file)
         session = CrawlSession.new initial_url: initial_url, output: output_file
-        while session.queue.peek != nil
-          SimpleCrawler::Worker.new.perform session
-        end
-        session.dump_results
+        
+        server = Server.new crawl_session: session
+        server.run
+        server
       end
-      
     end
   end
 end

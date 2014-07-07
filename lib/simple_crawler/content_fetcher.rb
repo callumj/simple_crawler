@@ -12,7 +12,9 @@ module SimpleCrawler
     end
 
     def content_info
-      @content_info ||= Models::ContentInfo.new(relative_uri, assets, links, title)
+      @content_info ||= Models::ContentInfo.new(relative_uri, assets, links, title).tap do |c|
+        c.original_uri = url
+      end
     end
 
     def merge_uri_with_page(uri)

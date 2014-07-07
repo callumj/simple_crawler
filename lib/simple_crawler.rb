@@ -16,6 +16,9 @@ module SimpleCrawler
   require 'simple_crawler/content_fetcher'
   require 'simple_crawler/worker'
 
+  require 'simple_crawler/server'
+  require 'simple_crawler/client'
+
   require 'simple_crawler/tasks'
 
   require 'logger'
