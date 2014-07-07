@@ -23,22 +23,37 @@ In the `ResultsStore` the following data is collected
 * `assets_usage`: A list of assets and the pages that utilise them
 * `incoming_links`: A list of pages and the pages they are linked to
 
+## Server mode
+
+`SimpleCrawler` provides support for operating in a client server mode. One task is started in server mode which is responsible for managing the session (queue and results store) and other clients interact with this session over the network. Client server mode is an excellent way to overcome MRI's single CPU limitations or rope additional boxes into the crawling operation.
+
+The `SimpleCrawler::Client::CrawlSession` implements a proxy verison of `CrawlSession` which uses `Connection` to send messages to the server over a TCP socket.
+
+**Be aware that communication between clients and server is achieved by marshalling Ruby objects which opens up the system to remote code execution vulnerabilities if the port is exposed. I recommend only operating client server on the same box or within the same data centre**
+
+
 ## CLI usage
 
 This tool is consists of two `rake` tasks
 
 * `single_run`: A single thread crawl that processes the queue one by one
 * `run`: A multi worker crawl that spins up a set amount of workers that are always trying to empty the queue
+* `server`: A server instance that allows workers (via `run`) to connect to it and work together to deplete the queue. This task will be responsible for storing the data and producing the final output.
 
 Both tasks support the following environment variables
 
-* `URL`: The initial URL to crawl
+* `URL`: The initial URL to crawl (not available when the task is a client)
 * `OUTPUT`: The directory that the storage adapter will write to
 * `LOG`: The file to write the log to, use "NONE" to disable logging
 
 The `run` task also supports the following
 
 * `MAX_WORKERS`: The max number of workers that can scale up. Default is `50`.
+* `SERVER`: An address like 127.0.0.1:9018 to connect to and operate in client mode. Note this disables the `URL` environment variable.
+
+The `server` task also supports the following
+
+* `LISTEN`: An address to listen to in the form of 127.0.0.1:9018 or :9018
 
 ## Getting started
 
