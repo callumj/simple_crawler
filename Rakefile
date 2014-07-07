@@ -18,9 +18,13 @@ task server: :setup do
 
   out = ENV["OUTPUT"]
   raise ArgumentError, "OUTPUT not provided as arg" if out.nil? || out.empty?
-  server = SimpleCrawler::Tasks::ServerOnly.run str, out
+
+  listen = ENV["LISTEN"]
+  server = SimpleCrawler::Tasks::ServerOnly.run str, out, listen
 
   trap("SIGINT") { server.shutdown! }
+
+  STDERR.puts "Listening: #{server.host}:#{server.port}"
 
   max_length = 0
   while server.active
