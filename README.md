@@ -31,6 +31,7 @@ The `SimpleCrawler::Client::CrawlSession` implements a proxy verison of `CrawlSe
 
 **Be aware that communication between clients and server is achieved by marshalling Ruby objects which opens up the system to remote code execution vulnerabilities if the port is exposed. I recommend only operating client server on the same box or within the same data centre.**
 
+`SimpleCrawler::Server` provides a TCP server that will spin up threads per connection, receiving the socket writes, marshalling, handling the message and returning a response. When a dequeue is performed it will keep track of URIs currently "checked out" and handle when they arrive back. This allows the `server` task to only shutdown when the queue and the checked out items are empty.
 
 ## CLI usage
 
