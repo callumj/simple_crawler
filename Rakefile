@@ -22,10 +22,13 @@ task server: :setup do
 
   trap("SIGINT") { server.shutdown! }
 
+  max_length = 0
   while server.active
-    STDERR.print "\rActive connections: #{server.active_connections.length} Results: #{server.crawl_session.results_store.contents.length} Popped off: #{server.awaiting_uris.length}"
+    s = "\rActive connections: #{server.active_connections.length} Results: #{server.crawl_session.results_store.contents.length} Popped off: #{server.awaiting_uris.length}"
+    max_length = s.length if s.length > max_length
+    STDERR.print s
     sleep 0.001
-    STDERR.print 100.times.map { " " }.join
+    STDERR.print max_length.times.map { " " }.join
   end
   puts
 end
