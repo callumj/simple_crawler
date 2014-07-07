@@ -61,6 +61,8 @@ describe SimpleCrawler::Server do
         expect(tcp).to receive(:accept).and_return(sock)
         expect(subject).to receive(:process).with(sock)
 
+        sleep 0.05
+
         subject.serve
       end
 
