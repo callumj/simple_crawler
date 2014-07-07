@@ -8,7 +8,7 @@ module SimpleCrawler
       attr_reader :socket
 
       def initialize(port = nil, host = nil)
-        port = 9018 if port.nil?
+        port = Server::DEFAULT_PORT if port.nil?
         host = "127.0.0.1" if host.nil?
         @socket = TCPSocket.new host, port
         @lock = Mutex.new
@@ -19,9 +19,9 @@ module SimpleCrawler
         @lock.synchronize do
           m = Message.new op, object
           @socket.puts Marshal.dump(m)
-          @socket.puts "!FIN!"
+          @socket.puts Server::FINISH_STR
           data = ""
-          until (resp = @socket.gets).strip == "!FIN!"
+          until (resp = @socket.gets).strip == Server::FINISH_STR
             data << resp
           end
 

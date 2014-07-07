@@ -4,10 +4,16 @@ require 'thread'
 module SimpleCrawler
   class Server
 
+    FINISH_STR = "!FIN!"
+
+    DEFAULT_PORT = 9018
     SHUTDOWN_AFTER_EMPTY_FOR = 100
+    SLEEP_FOR = 0.1
 
     attr_reader :crawl_session
     attr_reader :host, :port, :server, :active, :active_connections, :awaiting_uris
+
+    attr_reader :serve_thread, :monitor_thread
 
     def initialize(opts = {})
       @crawl_session = opts[:crawl_session]
@@ -15,13 +21,13 @@ module SimpleCrawler
 
       if opts[:listen] && !opts[:listen].empty?
         split = opts[:listen].split ":"
-        @host = split[0] unless split.length == 1
-        @port = split.last
-      else
-        @port = 9018
+        @host = split[0] if split.length > 1 && !split[0].empty?
+        @port = split.last && split.last.to_i      
       end
 
+      @port ||= DEFAULT_PORT
       @host ||= "0.0.0.0"
+
       @server = TCPServer.new @host, @port
       @active = true
 
@@ -33,13 +39,17 @@ module SimpleCrawler
       @dequeue_lock = Mutex.new
     end
 
+    def active?
+      @active == true
+    end
+
     def run
-      Thread.new { serve }
-      Thread.new { monitor_for_shutdown }
+      @serve_thread = Thread.new { serve }
+      @monitor_thread = Thread.new { monitor_for_shutdown }
     end
 
     def serve
-      while @active
+      while active?
         client = server.accept
         Thread.new { process client }
       end
@@ -52,7 +62,7 @@ module SimpleCrawler
     end
 
     def monitor_for_shutdown
-      while @active
+      while active?
         empty = crawl_session.queue.peek == nil && @awaiting_uris.empty?
         if empty
           if @empty_for >= SHUTDOWN_AFTER_EMPTY_FOR
@@ -63,15 +73,15 @@ module SimpleCrawler
           end
         end
 
-        sleep 0.1
+        sleep SLEEP_FOR
       end
     end
 
-    def process(thread_client)
+    def process(socket)
       @count_lock.synchronize { @active_connections << Thread.current }
-      while resp = thread_client.gets
+      while resp = socket.gets
         data = resp
-        until (more = thread_client.gets).strip == "!FIN!"
+        until (more = socket.gets).strip == FINISH_STR
           data << more
         end
 
@@ -84,12 +94,12 @@ module SimpleCrawler
         resp = handle_message message
         next if resp.nil?
         if resp == :close
-          thread_client.close
+          socket.close
           break
         else
           packed = Marshal.dump(resp)
-          thread_client.puts packed
-          thread_client.puts "!FIN!"
+          socket.puts packed
+          socket.puts FINISH_STR
         end
       end
       @count_lock.synchronize { @active_connections.delete Thread.current }
@@ -103,7 +113,7 @@ module SimpleCrawler
       elsif message.operation == "add_content"
         @dequeue_lock.synchronize { @awaiting_uris.delete message.object.original_uri.to_s }
         crawl_session.add_content message.object
-        true
+        return true
       elsif message.operation == "peek"
         return Client::Response.new(crawl_session.queue.peek)
       elsif message.operation == "ignore"
@@ -115,6 +125,7 @@ module SimpleCrawler
       elsif message.operation == "close"
         return :close
       end
+      true
     end
 
   end
