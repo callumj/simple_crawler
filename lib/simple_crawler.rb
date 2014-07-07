@@ -35,7 +35,7 @@ module SimpleCrawler
   def self.logger
     @@logger ||= begin
       log_source = if log_to
-        log_to.downcase == "NONE" ? nil : File.open(log_to, "w+")
+        log_to.downcase == "none" ? nil : File.open(log_to, "w+")
       else
         STDOUT
       end
