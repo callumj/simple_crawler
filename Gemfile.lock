@@ -8,6 +8,7 @@ GEM
       multipart-post (>= 1.2, < 3)
     faraday_middleware (0.9.1)
       faraday (>= 0.7.4, < 0.10)
+    json (1.7.7)
     method_source (0.8.2)
     mime-types (2.3)
     mini_portile (0.6.0)
@@ -40,6 +41,7 @@ DEPENDENCIES
   addressable
   faraday
   faraday_middleware
+  json
   mime-types
   nokogiri
   pry

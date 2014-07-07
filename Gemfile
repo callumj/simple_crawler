@@ -10,6 +10,8 @@ gem 'addressable'
 
 gem 'rake'
 
+gem 'json'
+
 group :development, :test do
   gem 'pry'
 end
