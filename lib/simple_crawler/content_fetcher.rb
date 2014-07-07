@@ -2,6 +2,9 @@ require 'addressable/uri'
 require 'mime-types'
 
 module SimpleCrawler
+
+  # Interacts with the Downloader and Scraper(s) to build a ContentInfo model that represents the page, its assets and links.
+
   class ContentFetcher
 
     attr_accessor :url, :session
@@ -17,6 +20,9 @@ module SimpleCrawler
       end
     end
 
+    # Uses the session information to merge the URI into either a relative or absolute format depending on the
+    # the relation the URL has to the session URI.
+
     def merge_uri_with_page(uri)
       unless uri.start_with?("../")
         uri = Addressable::URI.parse(uri).normalize unless uri.is_a?(Addressable::URI)
@@ -25,6 +31,8 @@ module SimpleCrawler
     rescue Addressable::URI::InvalidURIError => err
       return nil
     end
+
+    # Determines if the page is allowed to be downloaded
 
     def can_be_downloaded?
       TypeHelper.can_be_downloaded? this_uri.path

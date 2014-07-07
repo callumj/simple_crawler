@@ -2,6 +2,9 @@ require 'nokogiri'
 
 module SimpleCrawler
   module Scrapers
+
+    # Scans a stylesheet for url() references to build up a list of assets
+
     class CSS < Base
 
       EMPTY_LINKS = [].freeze

@@ -2,6 +2,9 @@ require 'nokogiri'
 
 module SimpleCrawler
   module Scrapers
+
+    # Utilises Nokogiri to scrape the contents of a HTML page for assets and links.
+
     class HTML < Base
 
       attr_accessor :dl_resp, :document
@@ -30,6 +33,8 @@ module SimpleCrawler
           end.uniq { |(href, text)| href }
         end
       end
+
+      # Returns the assets utilised by the page making use of the CSS scraper for internal CSS stylsheets or styles.
 
       def assets
         @assets ||= begin

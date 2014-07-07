@@ -2,6 +2,10 @@ require 'socket'
 require 'thread'
 
 module SimpleCrawler
+
+  # Provides a TCP server that exposes access to a limited set of functions for remote workers to perform distributed crawling functions.
+  # Makes use of Ruby's Marshal facility, only for internal or datacentre use.
+
   class Server
 
     FINISH_STR = "!FIN!"
@@ -48,6 +52,8 @@ module SimpleCrawler
       @monitor_thread = Thread.new { monitor_for_shutdown }
     end
 
+    # Begins accepting connections, forking off a Thread when a incoming connection begins
+
     def serve
       while active?
         client = server.accept
@@ -60,6 +66,8 @@ module SimpleCrawler
       @active = false
       @crawl_session.dump_results
     end
+
+    # Determine if it is safe to shutdown the server, only if the queue is empty and the system is no longer waiting on URIs.
 
     def monitor_for_shutdown
       while active?
@@ -76,6 +84,8 @@ module SimpleCrawler
         sleep SLEEP_FOR
       end
     end
+
+    # Handle an offloaded socket for the lifetime of the socket
 
     def process(socket)
       @count_lock.synchronize { @active_connections << Thread.current }

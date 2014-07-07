@@ -3,6 +3,10 @@ require 'cgi'
 
 module SimpleCrawler
   module StorageAdapters
+
+    # Implements the functionality needed to write information about a session to disk, using the XML format.
+    # Building 4 files to persist the storage layer to disk
+
     class File < Base
 
       XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>".freeze

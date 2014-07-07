@@ -1,5 +1,9 @@
 module SimpleCrawler
   module Client
+
+    # Creates a proxy session that implements all of the functionality of a session
+    # but communicates with the remote server for queue and storage related functions
+
     class CrawlSession < SimpleCrawler::CrawlSession
 
       class RemoteQueue

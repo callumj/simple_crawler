@@ -1,6 +1,10 @@
 require 'thread'
 
 module SimpleCrawler
+
+  # Provides the ability to enqueue and dequeue URIs to crawl onto a infinite queue.
+  # Makes use of Mutexs to ensure multiple threads don't conflict.
+
   class GlobalQueue
 
     class Node < Struct.new(:uri, :next); end
@@ -28,9 +32,13 @@ module SimpleCrawler
       valid_host?(uri) && !visited_before?(uri)
     end
 
+    # Look at the top of the queue
+
     def peek
       @mutex.synchronize { @head && @head.uri }
     end
+
+    # Push a URI object onto the end of the queue
 
     def enqueue(uri)
       res = @mutex.synchronize do
@@ -52,6 +60,8 @@ module SimpleCrawler
 
       res
     end
+
+    # Pop a URI off the front of the queue
 
     def dequeue
       fetched = nil

@@ -1,6 +1,11 @@
 require 'json'
 
 module SimpleCrawler
+
+  # Provides the central repository for information about the pages gathered by the crawlers.
+  # Data collected includes the pages, any stylesheets and usage information about assets and links.
+  # Provides callback facility for pages to resolve titles at serialisation time
+
   class ResultsStore
 
     attr_reader :crawl_session
@@ -20,6 +25,8 @@ module SimpleCrawler
 
       @add_content_lock = Mutex.new
     end
+
+    # Store a ContentInfo in the database
 
     def add_content(content_info)
       @add_content_lock.synchronize do

@@ -1,4 +1,7 @@
 module SimpleCrawler
+
+  # Interacts with a session to take the top of a queue and process it, adding it back to the session on success.
+
   class Worker
 
     def perform(session)

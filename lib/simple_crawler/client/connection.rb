@@ -3,6 +3,9 @@ require 'thread'
 
 module SimpleCrawler
   module Client
+
+    # Provides the connection and messaging passing to a server.
+
     class Connection
 
       attr_reader :socket

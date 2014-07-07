@@ -1,8 +1,17 @@
 module SimpleCrawler
+
+  # Represents a session for the lifetime of crawling, allows various services to query, store and ask questions about what to
+  # do with crawled content
+
   class CrawlSession
 
     attr_reader :host_restriction, :output, :initial_url, :initial_uri
     attr_reader :storage
+
+    # Initialize a instance providing a Hash of options
+    #  * initial_url: The address to the first page to be crawled
+    #  * host_restriction: The domain to restrict to, will be overridden by the domain found via initial_url
+    #  * output: The directory to write the results to (will be created)
 
     def initialize(opts = {})
       @initial_url = opts[:initial_url]
@@ -51,6 +60,8 @@ module SimpleCrawler
       end
     end
 
+    # Add a ContentInfo object to the results store
+
     def add_content(content_info)
       if results_store.contents.empty?
         if !content_info.final_uri.relative?
@@ -88,6 +99,8 @@ module SimpleCrawler
     def storage
       @storage ||= StorageAdapters::File.new crawl_session: self, output: @output
     end
+
+    # Tell the storage adapter to sync
 
     def dump_results
       storage.sync

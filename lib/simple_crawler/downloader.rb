@@ -22,6 +22,8 @@ module SimpleCrawler
       @url = potential_url
     end
 
+    # Will fetch the source from a web server, following the redirects and handling server errors.
+
     def obtain_source
       try_count = 0
       header_options = {}
