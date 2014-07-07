@@ -165,6 +165,10 @@ describe SimpleCrawler::ContentFetcher do
       it "should store a title" do
         expect(subject.content_info.title).to eq "TITLE"
       end
+
+      it "should store the original URI given to it" do
+        expect(subject.content_info.original_uri).to eq url
+      end
     end
 
   end
