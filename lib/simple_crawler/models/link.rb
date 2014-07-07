@@ -30,7 +30,7 @@ module SimpleCrawler
       end
 
       def title
-        @title ||= fallback_to_missing_title
+        @title ||= (fallback_to_missing_title || nil)
       end
 
     end

@@ -13,8 +13,11 @@ describe SimpleCrawler::Models::Link do
   end
 
   it "should expose prepare for JSON output" do
+    expect(subject).to receive(:fallback_to_missing_title).and_return("Some title")
+
     expect(subject.as_json).to eq({
-      uri: "http://google.com/help"
+      uri: "http://google.com/help",
+      title: "Some title"
     })
   end
 
