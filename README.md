@@ -29,7 +29,7 @@ In the `ResultsStore` the following data is collected
 
 The `SimpleCrawler::Client::CrawlSession` implements a proxy verison of `CrawlSession` which uses `Connection` to send messages to the server over a TCP socket.
 
-**Be aware that communication between clients and server is achieved by marshalling Ruby objects which opens up the system to remote code execution vulnerabilities if the port is exposed. I recommend only operating client server on the same box or within the same data centre**
+**Be aware that communication between clients and server is achieved by marshalling Ruby objects which opens up the system to remote code execution vulnerabilities if the port is exposed. I recommend only operating client server on the same box or within the same data centre.**
 
 
 ## CLI usage
