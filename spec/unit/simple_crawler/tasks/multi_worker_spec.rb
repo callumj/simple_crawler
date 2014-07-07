@@ -22,6 +22,28 @@ describe SimpleCrawler::Tasks::MultiWorker do
 
   end
 
+  describe ".client" do
+
+    it "should create a connection, with a crawl_session proxy for a supervisor" do
+      port = 8070
+      host = "localyhosty"
+
+      session = double :session
+      conn = double :connection
+      supervisor = double(:supervisor).tap do |s|
+        expect(s).to receive(:run)
+        expect(s).to receive(:run_forever=).with(true)
+      end
+
+      expect(SimpleCrawler::Client::Connection).to receive(:new).with(port, host).and_return(conn)
+      expect(SimpleCrawler::Client::CrawlSession).to receive(:new).with(conn).and_return(session)
+      expect(described_class::Supervisor).to receive(:new).with(session).and_return(supervisor)
+
+      expect(described_class.client(host, port)).to eq supervisor
+    end
+
+  end
+
   describe SimpleCrawler::Tasks::MultiWorker::Supervisor do
 
     let(:session) { double :session }
@@ -103,6 +125,25 @@ describe SimpleCrawler::Tasks::MultiWorker do
       it "should loop on any_active_workers?" do
         state = true
         expect(subject).to receive(:any_active_workers?).twice do
+          s = state
+          state = false
+          s
+        end
+
+        expect(subject).to receive(:clean_dead_workers)
+        expect(queue).to receive(:peek).exactly(3).times
+        expect(subject).to_not receive(:max_workers)
+
+        expect(subject).to receive(:sleep).with(described_class::SLEEP_FOR)
+        expect(session).to receive(:dump_results)
+
+        subject.keep_alive
+      end
+
+      it "should loop on running for ever" do
+        state = true
+        expect(subject).to receive(:any_active_workers?).and_return(false).twice
+        expect(subject).to receive(:run_forever).twice do
           s = state
           state = false
           s
