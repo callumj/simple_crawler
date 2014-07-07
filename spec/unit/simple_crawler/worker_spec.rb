@@ -38,6 +38,8 @@ describe SimpleCrawler::Worker do
     end
 
     it "should handle Errors::UnknownContent" do
+      expect(session).to receive(:notify_of_failure).with(uri)
+      
       expect(content).to receive(:content_info) do
         raise SimpleCrawler::Errors::UnknownContent
       end
@@ -48,6 +50,7 @@ describe SimpleCrawler::Worker do
     end
 
     it "should handle StandardError" do
+      expect(session).to receive(:notify_of_failure).with(uri)
       err = StandardError.new
       expect(content).to receive(:content_info) do
         raise err

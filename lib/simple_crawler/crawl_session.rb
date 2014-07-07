@@ -93,5 +93,15 @@ module SimpleCrawler
       storage.sync
     end
 
+    def notify_of_failure(dequeued_uri)
+
+    end
+
+    def info
+      {
+        initial_uri: @initial_uri
+      }
+    end
+
   end
 end
